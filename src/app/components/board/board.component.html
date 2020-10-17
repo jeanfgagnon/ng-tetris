@@ -1,0 +1,6 @@
+<div [ngStyle]="getDynaStyle">
+  <app-tile *ngFor="let tile of getBorderTile('top')" [Model]="tile"></app-tile>
+  <app-tile *ngFor="let tile of getBorderTile('bottom')" [Model]="tile"></app-tile>
+  <app-tile *ngFor="let tile of getBorderTile('left')" [Model]="tile"></app-tile>
+  <app-tile *ngFor="let tile of getBorderTile('right')" [Model]="tile"></app-tile>
+</div>

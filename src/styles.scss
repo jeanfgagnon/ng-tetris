@@ -1,1 +1,38 @@
 /* You can add global styles to this file, and also import other style files */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+// fy google with your ugly black border
+*, *:focus, *:hover{
+  outline: none;
+}
+
+.game-div {
+  position: relative;
+  padding: 10px;
+  padding-top: 20px;
+  box-sizing: border-box;
+  border: 1px solid #c0c0c0;
+  border-radius: 8px;
+  margin-top: 20px;
+  min-height: 30px;
+  //box-shadow: 1px 1px 5px 1px #333;
+}
+
+.game-div-title {
+  position: absolute;
+  top: -12px;
+  border: 1px solid #c0c0c0;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  padding: 3px 8px;
+  box-sizing: border-box;
+ // box-shadow: 1px 1px 3px 1px #333;
+}
+
+// ma boue std
+
+.fb {
+  font-weight: bold;
+}

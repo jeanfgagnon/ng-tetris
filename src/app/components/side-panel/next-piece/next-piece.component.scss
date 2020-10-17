@@ -1,0 +1,15 @@
+.next-piece {
+  display: flex;
+  flex-flow: column;
+  width: 90px;
+}
+
+.np-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #c0c0c0;
+  height: 50px;
+}

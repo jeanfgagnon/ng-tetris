@@ -1,0 +1,16 @@
+.game-title {
+  display: flex;
+  justify-content: center;
+  align-content: flex-end;
+}
+.game-name {
+  font-size: 1.8em;
+  font-weight: bold;
+}
+
+.fine-print {
+  font-size: .8em;
+  width: 90px;
+  margin-left: 5px;
+  align-self: center;
+}
