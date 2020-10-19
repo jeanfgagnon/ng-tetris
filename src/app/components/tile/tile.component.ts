@@ -31,12 +31,12 @@ export class TileComponent implements OnInit {
       left: `${this.Model.coords.x}px`,
       width: `${this.Model.size}px`,
       height: `${this.Model.size}px`,
+      boxShadow: 'inset 0 -1px 2px rgba(255,255,255,0.8), inset 0 1px 2px rgba(255,255,255,0.8)'
     };
 
     if (this.Model.isBorder) {
       Object.assign(style, {
         backgroundColor: 'black',
-        boxShadow: 'inset 0 -1px 2px rgba(255,255,255,0.8), inset 0 1px 2px rgba(255,255,255,0.8)'
       });
     }
     else {

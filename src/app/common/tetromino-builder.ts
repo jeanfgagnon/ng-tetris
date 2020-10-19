@@ -5,12 +5,15 @@ export class TetrominoBuilder {
   private tetrominoType: string;
   private cardinalPoint: CardinalPoints;
   private cellSize: number;
+  private showBorder = false;
+
   private matrice: Array<boolean[]>;
 
-  constructor(tt: string, cp: CardinalPoints, cs: number) {
+  constructor(tt: string, cp: CardinalPoints, cs: number, sb: boolean) {
     this.tetrominoType = tt;
     this.cardinalPoint = cp;
     this.cellSize = cs;
+    this.showBorder = sb;
   }
 
   public getHtml(): string {
@@ -28,16 +31,28 @@ export class TetrominoBuilder {
 
   private placeCube(): string {
     let html = '';
-    const cube = `<div style="width: ${this.cellSize}px; height: ${this.cellSize}px; position: absolute; top: YYYpx; left: XXXpx; background-color: ${this.bgColor()};"></div>`;
+    const cube = `<div style="SSSwidth: ${this.cellSize}px; height: ${this.cellSize}px; position: absolute; top: YYYpx; left: XXXpx; background-color: ${this.bgColor()};"></div>`;
+
     for (let y = 0; y < this.matrice.length; y++) {
       for (let x = 0; x < this.matrice[y].length; x++) {
         if (this.matrice[y][x]) {
-          html += cube.replace(/YYY/g, (y * this.cellSize).toString()).replace(/XXX/g, (x * this.cellSize).toString());
+          html += cube.replace(/YYY/g, (y * this.cellSize).toString())
+            .replace(/XXX/g, (x * this.cellSize).toString())
+            .replace(/SSS/g, this.getBorderStyle());
         }
       }
     }
 
     return html;
+  }
+
+  private getBorderStyle() {
+    let rv = '';
+    if (this.showBorder) {
+      rv= "box-shadow: rgba(255, 255, 255, 0.8) 0px -1px 2px inset, rgba(255, 255, 255, 0.8) 0px 1px 2px inset;"
+    }
+
+    return rv;
   }
 
   private bgColor(): string {
@@ -48,7 +63,7 @@ export class TetrominoBuilder {
         break;
 
       case 'O':
-        rv = 'Yellow';
+        rv = 'Brown';
         break;
 
       case 'T':

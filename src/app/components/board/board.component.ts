@@ -15,7 +15,6 @@ export class BoardComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.gameService.keypress$.subscribe(this.keypressHandler);
   }
 
   // helpers
@@ -81,12 +80,6 @@ export class BoardComponent implements OnInit {
     }
 
     return tms;
-  }
-
-  // privates
-
-  private keypressHandler = (e: KeyboardEvent): void => {
-    console.log('danlboard avec un keypress tabbbbb %s!', e.key);
   }
 
   // properties

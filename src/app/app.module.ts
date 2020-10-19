@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppComponent } from './app.component';
 import { GameComponent } from './components/game/game.component';
@@ -13,6 +14,7 @@ import { GameControlComponent } from './components/side-panel/game-control/game-
 import { HighScoresComponent } from './components/side-panel/high-scores/high-scores.component';
 import { DisplayValueComponent } from './components/side-panel/display-value/display-value.component';
 import { NextPieceComponent } from './components/side-panel/next-piece/next-piece.component';
+import { PlayFieldComponent } from './components/play-field/play-field.component';
 
 @NgModule({
   declarations: [
@@ -27,10 +29,12 @@ import { NextPieceComponent } from './components/side-panel/next-piece/next-piec
     GameControlComponent,
     HighScoresComponent,
     DisplayValueComponent,
-    NextPieceComponent
+    NextPieceComponent,
+    PlayFieldComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

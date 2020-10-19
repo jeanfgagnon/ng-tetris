@@ -12,10 +12,13 @@ export class GameService {
   private validKeys: string[] = [];
   private keypressSubject = new Subject<KeyboardEvent>();
   private nextTetrominoSubject = new Subject<string>();
+  private currentTetrominoSubject = new Subject<string>();
 
-  private tetrominosType: string[] = [];
   private nextTetrominoType = '';
+  private currentTetrominoType: string;
   private multiValue = new Map<string, number>();
+
+  private readonly minInterval = 200;
 
   // tétriste lol
   public readonly name = 'Tétriste';
@@ -25,8 +28,13 @@ export class GameService {
   public readonly boardRows = 24;
   public readonly boardCols = 10;
 
+  public running = false;
+  public intervalle = 1000;
+  public timerHandle: any = null;
+
   public keypress$: Observable<KeyboardEvent>;
   public nextTetromino$: Observable<string>;
+  public currentTetromino$: Observable<string>;
 
   constructor(
   ) {
@@ -34,12 +42,12 @@ export class GameService {
 
     this.keypress$ = this.keypressSubject.asObservable();
     this.nextTetromino$ = this.nextTetrominoSubject.asObservable();
+    this.currentTetromino$ = this.currentTetrominoSubject.asObservable();
 
     this.multiValue.set('elapsed', 69);
     this.multiValue.set('score', 0);
     this.multiValue.set('lines', 0);
-
-    this.tetrominosType = this.getTetreominosType();
+//    this.currentTetrominoType = this.getRandomTetromino();
   }
 
   public get boardHeight(): number {
@@ -64,6 +72,10 @@ export class GameService {
     this.validKeys = keys;
   }
 
+  public getCurrentTetrominoType(): string {
+    return this.currentTetrominoType;
+  }
+
   public getValue(name: string): number {
     let rv = 0;
     if (this.multiValue.has(name)) {
@@ -73,21 +85,34 @@ export class GameService {
     return rv;
   }
 
-  // genère le html d'un tétromino.
-  public generateTetromino(tetrominoType: string, cp: CardinalPoints, cellSize: number) {
-    const tetrominoBuilder = new TetrominoBuilder(tetrominoType, cp, cellSize);
+  // génère le html d'un tétromino.
+  public generateTetromino(tetrominoType: string, cp: CardinalPoints, cellSize: number, showBorder: boolean = false): string {
+    const tetrominoBuilder = new TetrominoBuilder(tetrominoType, cp, cellSize, showBorder);
 
     return tetrominoBuilder.getHtml();
   }
 
   // get un tetrominoType au hasard et le swing dans le sujet
   public nextTetromino(): void {
-    this.nextTetrominoType = this.tetrominosType[Math.floor(Math.random() * this.tetrominosType.length)];
-    console.log(this.nextTetrominoType);
+    if (this.nextTetrominoType) {
+      this.currentTetrominoType = this.nextTetrominoType;
+    }
+    else {
+      this.currentTetrominoType = this.getRandomTetromino();
+    }
+    this.currentTetrominoSubject.next(this.currentTetrominoType);
+    this.nextTetrominoType = this.getRandomTetromino();
     this.nextTetrominoSubject.next(this.nextTetrominoType);
   }
 
   // privates
+
+  private getRandomTetromino(): string {
+    const tetrominosType = this.getTetreominosType();
+    const rv = tetrominosType[Math.floor(Math.random() * tetrominosType.length)];
+
+    return rv;
+  }
 
   private getTetreominosType(): string[] {
     return ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];

@@ -1,0 +1,6 @@
+<div [style]="getFieldStyle">
+  <div id='fieldRow' *ngFor="let row of tableau">
+    <app-tile *ngFor="let tileModel of row" [Model]="tileModel"></app-tile>
+  </div>
+  <div #piece class="piece-container" id='divContainer' [innerHtml]="tetrominoHtml"></div>
+</div>
