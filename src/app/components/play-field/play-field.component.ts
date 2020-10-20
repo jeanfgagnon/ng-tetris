@@ -21,6 +21,8 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   private readonly fieldWidth = this.gameService.cellSize * (this.gameService.boardCols);
   private cpArray: CardinalPoints[];
   private currentCP = 0;
+  private moveInfo: AnyMoveInfo;
+  private moveProc: AnyMoveProcessor;
 
   public tableau: Array<TileModel[]> = [];
   public tetrominoHtml: SafeHtml = '';
@@ -46,6 +48,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   }
 
   public ngAfterViewInit(): void {
+    this.moveProc = new AnyMoveProcessor(this.animDoneCallback);
     this.placePiece();
   }
 
@@ -63,22 +66,22 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
         if (this.currentCP > 3) {
           this.currentCP = 0;
         }
+        this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.gameService.generateTetromino(this.gameService.getCurrentTetrominoType(), this.cpArray[this.currentCP], this.gameService.cellSize, true));
         break;
 
       case "ArrowLeft": {
-        const moveInfo = this.getMoveInfo(CardinalPoints.west);
-        const moveProc = new AnyMoveProcessor(moveInfo, this.animDoneCallback);
-        moveProc.move();
+        this.moveInfo = this.getMoveInfo(CardinalPoints.west);
+        this.moveProc.move(this.moveInfo);
         break;
       }
 
       case "ArrowRight":
-        const moveInfo = this.getMoveInfo(CardinalPoints.east);
-        const moveProc = new AnyMoveProcessor(moveInfo, this.animDoneCallback);
-        moveProc.move();
+        this.moveInfo = this.getMoveInfo(CardinalPoints.east);
+        this.moveProc.move(this.moveInfo);
         break;
     }
-    this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.gameService.generateTetromino(this.gameService.getCurrentTetrominoType(), this.cpArray[this.currentCP], this.gameService.cellSize, true));
+    e.preventDefault(); // ツ
+    e.stopPropagation();
   }
 
   public animDoneCallback = (mi: AnyMoveInfo): void => {
@@ -100,7 +103,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
         y: this.pieceCoords.y
       },
       direction: cp,
-      duration: 300,
+      duration: 200,
       distance: this.gameService.cellSize,
       element: this.piece,
       animationBuilder: this.animBuilder

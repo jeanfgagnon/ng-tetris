@@ -11,14 +11,14 @@ export class AnyMoveProcessor {
 
   // C'TORs
 
-  public constructor(mi: AnyMoveInfo, callback: AfterMoveCallback | null) {
-    this.moveInfo = mi;
+  public constructor(callback: AfterMoveCallback | null) {
     this.afterMoveCallback = callback;
   }
 
   // publics
 
-  public move() {
+  public move(mi: AnyMoveInfo) {
+    this.moveInfo = mi;
     this.calcFutureCoords();
     this.animate();
   }
