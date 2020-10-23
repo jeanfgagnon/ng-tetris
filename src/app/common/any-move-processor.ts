@@ -54,22 +54,12 @@ export class AnyMoveProcessor {
 
     meta = [
       style({
-        left: `${this.moveInfo.futureCoords.x}px`,
-        top: `${this.moveInfo.futureCoords.y}px`,
-        filter: 'brightness(.75)'
-      }),
-      style({
-        transform: 'rotate(-2deg)',
-        filter: 'brightness(1.15)'
-      }),
-      style({
-        filter: 'brightness(1)'
+        left: `${this.moveInfo.coords.x}px`,
+        top: `${this.moveInfo.coords.y}px`
       }),
       style({
         left: `${this.moveInfo.futureCoords.x}px`,
-        top: `${this.moveInfo.futureCoords.y}px`,
-        transform: 'rotate(2deg)',
-        filter: 'brightness(1)'
+        top: `${this.moveInfo.futureCoords.y}px`
       })
     ];
 

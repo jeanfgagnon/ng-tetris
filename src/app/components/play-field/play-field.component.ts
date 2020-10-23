@@ -22,6 +22,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   private cpArray: CardinalPoints[];
   private currentCP = 0;
   private moveProc: AnyMoveProcessor;
+  private isAnimating = false;
 
   public tableau: Array<TileModel[]> = [];
   public tetrominoHtml: SafeHtml = '';
@@ -59,25 +60,32 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
 
   @HostListener('window:keyup', ['$event'])
   public keypressHandler = (e: KeyboardEvent): void => {
-    switch (e.key) {
-      case "ArrowUp":
-        this.currentCP++;
-        if (this.currentCP > 3) {
-          this.currentCP = 0;
+    if (!this.isAnimating) {
+      switch (e.key) {
+        case "ArrowUp":
+          this.currentCP++;
+          if (this.currentCP > 3) {
+            this.currentCP = 0;
+          }
+          this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.gameService.generateTetromino(this.gameService.getCurrentTetrominoType(), this.cpArray[this.currentCP], this.gameService.cellSize, true));
+          break;
+
+        case "ArrowLeft": {
+          const moveInfo = this.getMoveInfo(CardinalPoints.west);
+          this.isAnimating = true;
+          this.moveProc.move(moveInfo);
+          break;
         }
-        this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.gameService.generateTetromino(this.gameService.getCurrentTetrominoType(), this.cpArray[this.currentCP], this.gameService.cellSize, true));
-        break;
 
-      case "ArrowLeft": {
-        const moveInfo = this.getMoveInfo(CardinalPoints.west);
-        this.moveProc.move(moveInfo);
-        break;
+        case "ArrowRight":
+          const moveInfo = this.getMoveInfo(CardinalPoints.east);
+          this.isAnimating = true;
+          this.moveProc.move(moveInfo);
+          break;
       }
-
-      case "ArrowRight":
-        const moveInfo = this.getMoveInfo(CardinalPoints.east);
-        this.moveProc.move(moveInfo);
-        break;
+    }
+    else {
+      console.log('Key missed: %s', e.key);
     }
     e.preventDefault(); // ツ
     e.stopPropagation();
@@ -87,6 +95,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
     this.pieceCoords.x = mi.futureCoords.x;
     this.pieceCoords.y = mi.futureCoords.y;
     this.placePiece();
+    this.isAnimating = false;
   }
 
   // privates
@@ -102,7 +111,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
         y: this.pieceCoords.y
       },
       direction: cp,
-      duration: 200,
+      duration: 150,
       distance: this.gameService.cellSize,
       element: this.piece,
       animationBuilder: this.animBuilder
