@@ -32,22 +32,17 @@ export class GameService {
   public intervalle = 1000;
   public timerHandle: any = null;
 
-  public keypress$: Observable<KeyboardEvent>;
   public nextTetromino$: Observable<string>;
   public currentTetromino$: Observable<string>;
 
   constructor(
   ) {
-    window.addEventListener('keydown', this.keypressHandler);
-
-    this.keypress$ = this.keypressSubject.asObservable();
     this.nextTetromino$ = this.nextTetrominoSubject.asObservable();
     this.currentTetromino$ = this.currentTetrominoSubject.asObservable();
 
     this.multiValue.set('elapsed', 69);
     this.multiValue.set('score', 0);
     this.multiValue.set('lines', 0);
-//    this.currentTetrominoType = this.getRandomTetromino();
   }
 
   public get boardHeight(): number {
@@ -58,18 +53,7 @@ export class GameService {
     return this.cellSize * (this.boardCols + 2);
   }
 
-  public keypressHandler = (event: KeyboardEvent) => {
-    if (this.validKeys.indexOf(event.key) > -1) {
-      this.keypressSubject.next(event);
-    }
-  };
-
   public dispose(): void {
-    window.removeEventListener('keydown', this.keypressHandler);
-  }
-
-  public acceptKeypress(keys: string[]): void {
-    this.validKeys = keys;
   }
 
   public getCurrentTetrominoType(): string {

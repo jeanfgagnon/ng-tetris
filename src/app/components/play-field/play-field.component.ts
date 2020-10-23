@@ -1,5 +1,5 @@
 import { AnimationBuilder } from '@angular/animations';
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AnyMoveProcessor } from 'src/app/common/any-move-processor';
 
@@ -21,7 +21,6 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   private readonly fieldWidth = this.gameService.cellSize * (this.gameService.boardCols);
   private cpArray: CardinalPoints[];
   private currentCP = 0;
-  private moveInfo: AnyMoveInfo;
   private moveProc: AnyMoveProcessor;
 
   public tableau: Array<TileModel[]> = [];
@@ -37,7 +36,6 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.gameService.keypress$.subscribe(this.keypressHandler);
     this.gameService.currentTetromino$.subscribe(this.currentTetrominoHandler);
     this.pieceCoords = {
       x: this.gameService.cellSize * 3,
@@ -59,6 +57,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
     this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.gameService.generateTetromino(currentTetrominoType, this.cpArray[this.currentCP], this.gameService.cellSize, true));
   }
 
+  @HostListener('window:keyup', ['$event'])
   public keypressHandler = (e: KeyboardEvent): void => {
     switch (e.key) {
       case "ArrowUp":
@@ -70,14 +69,14 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
         break;
 
       case "ArrowLeft": {
-        this.moveInfo = this.getMoveInfo(CardinalPoints.west);
-        this.moveProc.move(this.moveInfo);
+        const moveInfo = this.getMoveInfo(CardinalPoints.west);
+        this.moveProc.move(moveInfo);
         break;
       }
 
       case "ArrowRight":
-        this.moveInfo = this.getMoveInfo(CardinalPoints.east);
-        this.moveProc.move(this.moveInfo);
+        const moveInfo = this.getMoveInfo(CardinalPoints.east);
+        this.moveProc.move(moveInfo);
         break;
     }
     e.preventDefault(); // ツ
@@ -144,7 +143,6 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   private placePiece(): void {
     this.renderer.setStyle(this.piece.nativeElement, 'left', `${this.pieceCoords.x}px`);
     this.renderer.setStyle(this.piece.nativeElement, 'top', `${this.pieceCoords.y}px`);
-    //this.renderer.setStyle(this.piece.nativeElement, 'left', `${this.gameService.cellSize * 3}px`)
   }
 
   // properties

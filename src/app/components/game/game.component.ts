@@ -7,7 +7,7 @@ import { GameService } from 'src/app/services/game.service';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss']
 })
-export class GameComponent implements OnInit, OnDestroy {
+export class GameComponent {
 
   private validKeypress = [
     " ",
@@ -17,18 +17,5 @@ export class GameComponent implements OnInit, OnDestroy {
     "ArrowDown",
     "Escape"
   ];
-
-  constructor(
-    private gameService: GameService
-  ) {
-    this.gameService.acceptKeypress(this.validKeypress);
-   }
-
-  ngOnInit(): void {
-  }
-
-  ngOnDestroy(): void {
-    this.gameService.dispose();
-  }
 
 }
