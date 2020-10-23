@@ -3,11 +3,12 @@ import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, O
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AnyMoveProcessor } from 'src/app/common/any-move-processor';
 
-import { CardinalPoints } from 'src/app/common/cardinal-points-enum';
 import { AnyMoveInfo } from 'src/app/models/any-move-info';
+import { CardinalPoints } from 'src/app/common/cardinal-points-enum';
 import { CartesianCoords } from 'src/app/models/cartesian-coords';
-import { TileModel } from 'src/app/models/tile-model';
+import { DataQueue } from 'src/app/common/data-queue';
 import { GameService } from 'src/app/services/game.service';
+import { TileModel } from 'src/app/models/tile-model';
 
 @Component({
   selector: 'app-play-field',
@@ -23,6 +24,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   private currentCP = 0;
   private moveProc: AnyMoveProcessor;
   private isAnimating = false;
+  private keyQueue = new DataQueue();
 
   public tableau: Array<TileModel[]> = [];
   public tetrominoHtml: SafeHtml = '';
@@ -85,6 +87,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
       }
     }
     else {
+      this.keyQueue.enqueue(e.key);
       console.log('Key missed: %s', e.key);
     }
     e.preventDefault(); // ツ
