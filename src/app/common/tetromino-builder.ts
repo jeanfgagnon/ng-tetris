@@ -63,7 +63,7 @@ export class TetrominoBuilder {
         break;
 
       case 'O':
-        rv = 'Brown';
+        rv = 'Yellow';
         break;
 
       case 'T':

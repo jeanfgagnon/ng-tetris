@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject, Subscription } from 'rxjs';
-import { fromEvent } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+
 import { CardinalPoints } from '../common/cardinal-points-enum';
+import { GameState } from '../common/game-state-enum';
 import { TetrominoBuilder } from '../common/tetromino-builder';
 
 @Injectable({
@@ -13,6 +14,7 @@ export class GameService {
   private keypressSubject = new Subject<KeyboardEvent>();
   private nextTetrominoSubject = new Subject<string>();
   private currentTetrominoSubject = new Subject<string>();
+  private currentGameStateSubject = new BehaviorSubject<GameState>(GameState.stopped);
 
   private nextTetrominoType = '';
   private currentTetrominoType: string;
@@ -29,28 +31,26 @@ export class GameService {
   public readonly boardCols = 10;
 
   public running = false;
-  public intervalle = 1000;
+  public intervalle = 400;
   public timerHandle: any = null;
 
   public nextTetromino$: Observable<string>;
   public currentTetromino$: Observable<string>;
+  public currentGameState$: Observable<GameState>;
 
   constructor(
   ) {
     this.nextTetromino$ = this.nextTetrominoSubject.asObservable();
     this.currentTetromino$ = this.currentTetrominoSubject.asObservable();
+    this.currentGameState$ = this.currentGameStateSubject.asObservable();
 
     this.multiValue.set('elapsed', 69);
     this.multiValue.set('score', 0);
     this.multiValue.set('lines', 0);
   }
 
-  public get boardHeight(): number {
-    return this.cellSize * (this.boardRows + 2);
-  }
-
-  public get boardWidth(): number {
-    return this.cellSize * (this.boardCols + 2);
+  public setGameState(gs: GameState) : void {
+    this.currentGameStateSubject.next(gs);
   }
 
   public dispose(): void {
@@ -89,6 +89,10 @@ export class GameService {
     this.nextTetrominoSubject.next(this.nextTetrominoType);
   }
 
+  public gameState(gs: GameState): void {
+    this.currentGameStateSubject.next(gs);
+  }
+
   // privates
 
   private getRandomTetromino(): string {
@@ -101,4 +105,19 @@ export class GameService {
   private getTetreominosType(): string[] {
     return ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
   }
+
+  // properties
+
+  public get currentGameState(): GameState {
+    return this.currentGameStateSubject.getValue();
+  }
+
+  public get boardHeight(): number {
+    return this.cellSize * (this.boardRows + 2);
+  }
+
+  public get boardWidth(): number {
+    return this.cellSize * (this.boardCols + 2);
+  }
+
 }

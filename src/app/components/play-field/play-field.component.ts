@@ -1,14 +1,17 @@
 import { AnimationBuilder } from '@angular/animations';
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { AnyMoveProcessor } from 'src/app/common/any-move-processor';
+import { interval } from 'rxjs';
+import { takeWhile } from "rxjs/operators";
 
+import { AnyMoveProcessor } from 'src/app/common/any-move-processor';
 import { AnyMoveInfo } from 'src/app/models/any-move-info';
 import { CardinalPoints } from 'src/app/common/cardinal-points-enum';
 import { CartesianCoords } from 'src/app/models/cartesian-coords';
 import { DataQueue } from 'src/app/common/data-queue';
 import { GameService } from 'src/app/services/game.service';
 import { TileModel } from 'src/app/models/tile-model';
+import { GameState } from 'src/app/common/game-state-enum';
 
 @Component({
   selector: 'app-play-field',
@@ -16,7 +19,6 @@ import { TileModel } from 'src/app/models/tile-model';
   styleUrls: ['./play-field.component.scss']
 })
 export class PlayFieldComponent implements AfterViewInit, OnInit {
-
   private pieceCoords: CartesianCoords;
   private readonly fieldHeight = this.gameService.cellSize * (this.gameService.boardRows);
   private readonly fieldWidth = this.gameService.cellSize * (this.gameService.boardCols);
@@ -25,6 +27,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   private moveProc: AnyMoveProcessor;
   private isAnimating = false;
   private keyQueue = new DataQueue();
+  private previousGameState = GameState.stopped;
 
   public tableau: Array<TileModel[]> = [];
   public tetrominoHtml: SafeHtml = '';
@@ -39,11 +42,9 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.gameService.currentGameState$.subscribe(this.currentGameStateHandler);
     this.gameService.currentTetromino$.subscribe(this.currentTetrominoHandler);
-    this.pieceCoords = {
-      x: this.gameService.cellSize * 3,
-      y: 0
-    };
+    this.resetPieceCoords();
     this.initCpStuff();
     this.buildTableau();
   }
@@ -54,6 +55,24 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   }
 
   // Event handlers
+
+  public currentGameStateHandler = (gs: GameState): void => {
+    if (gs === GameState.started) {
+      if (this.previousGameState === GameState.stopped) {
+        this.gameService.nextTetromino();
+      }
+      this.runGame();
+    }
+    else if (gs === GameState.pausing) {
+      console.log('Game is paused');
+    }
+    else {
+      if (this.previousGameState === GameState.started) {
+        this.cleanup();
+      }
+    }
+    this.previousGameState = gs;
+  }
 
   public currentTetrominoHandler = (currentTetrominoType: string): void => {
     this.currentCP = 0;
@@ -72,17 +91,20 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
           this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.gameService.generateTetromino(this.gameService.getCurrentTetrominoType(), this.cpArray[this.currentCP], this.gameService.cellSize, true));
           break;
 
-        case "ArrowLeft": {
-          const moveInfo = this.getMoveInfo(CardinalPoints.west);
-          this.isAnimating = true;
-          this.moveProc.move(moveInfo);
+        case "ArrowLeft":
+          this.pieceCoords.x -= this.gameService.cellSize;
+          // const moveInfo = this.getMoveInfo(CardinalPoints.west);
+          // this.isAnimating = true;
+          // this.moveProc.move(moveInfo);
+          this.placePiece();
           break;
-        }
 
         case "ArrowRight":
-          const moveInfo = this.getMoveInfo(CardinalPoints.east);
-          this.isAnimating = true;
-          this.moveProc.move(moveInfo);
+          this.pieceCoords.x += this.gameService.cellSize;
+          // const moveInfo = this.getMoveInfo(CardinalPoints.east);
+          // this.isAnimating = true;
+          // this.moveProc.move(moveInfo);
+          this.placePiece();
           break;
       }
     }
@@ -103,6 +125,17 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
 
   // privates
 
+  // main game loooooooop
+  private runGame(): void {
+    interval(this.gameService.intervalle).pipe(takeWhile(x => this.gameService.currentGameState === GameState.started)).subscribe(() => {
+      console.log('game is running');
+
+      const moveInfo = this.getMoveInfo(CardinalPoints.south);
+      this.moveProc.move(moveInfo);
+
+    });
+  }
+
   private getMoveInfo(cp: CardinalPoints): AnyMoveInfo {
     return {
       coords: {
@@ -114,7 +147,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
         y: this.pieceCoords.y
       },
       direction: cp,
-      duration: 150,
+      duration: this.gameService.intervalle - 100,
       distance: this.gameService.cellSize,
       element: this.piece,
       animationBuilder: this.animBuilder
@@ -128,7 +161,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
       for (let col = 0; col < this.gameService.boardCols; col++) {
         const tileModel: TileModel = {
           isBorder: false,
-          bgColor: '#444444',
+          bgColor: '#888888',
           size: this.gameService.cellSize,
           coords: {
             x: col * this.gameService.cellSize,
@@ -155,6 +188,20 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   private placePiece(): void {
     this.renderer.setStyle(this.piece.nativeElement, 'left', `${this.pieceCoords.x}px`);
     this.renderer.setStyle(this.piece.nativeElement, 'top', `${this.pieceCoords.y}px`);
+  }
+
+  private resetPieceCoords(): void {
+    this.pieceCoords = {
+      x: this.gameService.cellSize * 3,
+      y: 0
+    };
+  }
+
+  private cleanup() {
+    console.log('cleanup');
+    this.tetrominoHtml = '';
+    this.resetPieceCoords();
+    this.placePiece();
   }
 
   // properties

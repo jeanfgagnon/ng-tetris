@@ -8,6 +8,7 @@ export class DataQueue {
   }
 
   public enqueue(item: any): void {
+    console.log('enqueue %s', item.toString());
     this.queue.push(item);
   }
 
@@ -25,5 +26,17 @@ export class DataQueue {
 
   public size(): number {
     return this.queue.length;
+  }
+
+  public toString(): string {
+    let rv = '';
+    this.queue.forEach((item: any, i: number) => {
+      rv += item.toString();
+      if (i < this.queue.length -1) {
+        rv += ', ';
+      }
+    });
+
+    return rv;
   }
 }

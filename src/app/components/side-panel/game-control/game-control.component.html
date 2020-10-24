@@ -1,11 +1,11 @@
 <div class="game-control">
-  <button type="button" class="gc-button" (click)="newGameClick($event)" #btnnew>
-    New<br />
+  <button type="button" class="gc-button" (click)="newGameClick()" #btnnew>
+    {{ btnNewText }}<br />
     Game
   </button>
 
-  <button type="button" class="gc-button" #btnpause>
-    Pause<br />
+  <button type="button" class="gc-button" (click)="pauseGameClick()" #btnpause>
+    {{ btnPauseText }}<br />
     (esc)
   </button>
 
