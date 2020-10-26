@@ -9,13 +9,4 @@ import { GameService } from 'src/app/services/game.service';
 })
 export class GameComponent {
 
-  private validKeypress = [
-    " ",
-    "ArrowLeft",
-    "ArrowRight",
-    "ArrowUp",
-    "ArrowDown",
-    "Escape"
-  ];
-
 }
