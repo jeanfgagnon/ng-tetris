@@ -28,6 +28,7 @@ export class BoardComponent implements OnInit {
           isBorder: true,
           bgColor: '',
           size: this.gameService.cellSize,
+          free: false,
           coords: {
             x: i * this.gameService.cellSize,
             y: 0
@@ -42,6 +43,7 @@ export class BoardComponent implements OnInit {
           isBorder: true,
           bgColor: '',
           size: this.gameService.cellSize,
+          free: false,
           coords: {
             x: i * this.gameService.cellSize,
             y: this.gameService.cellSize * (this.gameService.boardRows + 1)
@@ -56,6 +58,7 @@ export class BoardComponent implements OnInit {
           isBorder: true,
           bgColor: '',
           size: this.gameService.cellSize,
+          free: false,
           coords: {
             x: 0,
             y: i * this.gameService.cellSize
@@ -70,6 +73,7 @@ export class BoardComponent implements OnInit {
           isBorder: true,
           bgColor: '',
           size: this.gameService.cellSize,
+          free: false,
           coords: {
             x: this.gameService.cellSize * (this.gameService.boardCols + 1),
             y: i * this.gameService.cellSize

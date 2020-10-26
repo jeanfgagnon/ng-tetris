@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeHtml, SafeStyle } from '@angular/platform-browser';
 
-import { CardinalPoints } from 'src/app/common/cardinal-points-enum';
+import { CardinalPoint } from 'src/app/common/cardinal-points-enum';
 import { GameService } from 'src/app/services/game.service';
 
 @Component({
@@ -19,7 +19,8 @@ export class NextPieceComponent implements OnInit {
 
   ngOnInit(): void {
     this.gameService.nextTetromino$.subscribe((tt: string) => {
-      this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.gameService.generateTetromino(tt, CardinalPoints.north, 10));
+      const tetrominoInfo = this.gameService.generateTetromino(tt, CardinalPoint.north, 10);
+      this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(tetrominoInfo.html);
     });
   }
 

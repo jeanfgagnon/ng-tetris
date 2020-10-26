@@ -1,24 +1,38 @@
-import { CardinalPoints } from './cardinal-points-enum';
+import { TetrominoInfo } from '../models/tetromino-info';
+import { CardinalPoint } from './cardinal-points-enum';
 
 export class TetrominoBuilder {
 
   private tetrominoType: string;
-  private cardinalPoint: CardinalPoints;
+  private cardinalPoint: CardinalPoint;
   private cellSize: number;
   private showBorder = false;
 
   private matrice: Array<boolean[]>;
 
-  constructor(tt: string, cp: CardinalPoints, cs: number, sb: boolean) {
+  constructor(tt: string, cp: CardinalPoint, cs: number, sb: boolean) {
     this.tetrominoType = tt;
     this.cardinalPoint = cp;
     this.cellSize = cs;
     this.showBorder = sb;
   }
 
-  public getHtml(): string {
-    this.setMatrice();
+
+  public tetrominoInfo(): TetrominoInfo {
     const { styleWidth, styleHeight } = this.getStyleWH();
+    this.createMatrice();
+    return {
+      html: this.getHtml(styleWidth, styleHeight),
+      width: styleWidth,
+      height: styleHeight,
+      bgColor: this.bgColor(),
+      matrice: this.matrice
+    };
+  }
+
+  // privates
+
+  private getHtml(styleWidth: number, styleHeight: number): string {
 
     let html = `<div style="position: relative; width: ${styleWidth}px; height: ${styleHeight}px">`;
     html += this.placeCube();
@@ -26,8 +40,6 @@ export class TetrominoBuilder {
 
     return html
   }
-
-  // privates
 
   private placeCube(): string {
     let html = '';
@@ -49,7 +61,7 @@ export class TetrominoBuilder {
   private getBorderStyle() {
     let rv = '';
     if (this.showBorder) {
-      rv= "box-shadow: rgba(255, 255, 255, 0.8) 0px -1px 2px inset, rgba(255, 255, 255, 0.8) 0px 1px 2px inset;"
+      rv = "box-shadow: rgba(255, 255, 255, 0.8) 0px -1px 2px inset, rgba(255, 255, 255, 0.8) 0px 1px 2px inset;"
     }
 
     return rv;
@@ -90,12 +102,12 @@ export class TetrominoBuilder {
     return rv;
   }
 
-  private setMatrice(): void {
+  private createMatrice(): void {
     this.matrice = [];
     let row: boolean[];
     switch (this.tetrominoType) {
       case 'I':
-        if (this.cardinalPoint === CardinalPoints.north || this.cardinalPoint === CardinalPoints.south) {
+        if (this.cardinalPoint === CardinalPoint.north || this.cardinalPoint === CardinalPoint.south) {
           row = [true, true, true, true];
           this.matrice.push(row);
         }
@@ -116,21 +128,21 @@ export class TetrominoBuilder {
 
       case 'T':
         switch (this.cardinalPoint) {
-          case CardinalPoints.north:
+          case CardinalPoint.north:
             row = [false, true, false];
             this.matrice.push(row);
             row = [true, true, true];
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.south:
+          case CardinalPoint.south:
             row = [true, true, true];
             this.matrice.push(row);
             row = [false, true, false];
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.east:
+          case CardinalPoint.east:
             row = [false, true];
             this.matrice.push(row);
             row = [true, true];
@@ -139,7 +151,7 @@ export class TetrominoBuilder {
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.west:
+          case CardinalPoint.west:
             row = [true, false];
             this.matrice.push(row);
             row = [true, true];
@@ -152,16 +164,16 @@ export class TetrominoBuilder {
 
       case 'S':
         switch (this.cardinalPoint) {
-          case CardinalPoints.south:
-          case CardinalPoints.north:
+          case CardinalPoint.south:
+          case CardinalPoint.north:
             row = [false, true, true];
             this.matrice.push(row);
             row = [true, true, false];
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.west:
-          case CardinalPoints.east:
+          case CardinalPoint.west:
+          case CardinalPoint.east:
             row = [true, false];
             this.matrice.push(row);
             row = [true, true];
@@ -174,16 +186,16 @@ export class TetrominoBuilder {
 
       case 'Z':
         switch (this.cardinalPoint) {
-          case CardinalPoints.south:
-          case CardinalPoints.north:
+          case CardinalPoint.south:
+          case CardinalPoint.north:
             row = [true, true, false];
             this.matrice.push(row);
             row = [false, true, true];
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.west:
-          case CardinalPoints.east:
+          case CardinalPoint.west:
+          case CardinalPoint.east:
             row = [false, true];
             this.matrice.push(row);
             row = [true, true];
@@ -196,21 +208,21 @@ export class TetrominoBuilder {
 
       case 'J':
         switch (this.cardinalPoint) {
-          case CardinalPoints.north:
+          case CardinalPoint.north:
             row = [true, false, false];
             this.matrice.push(row);
             row = [true, true, true];
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.south:
+          case CardinalPoint.south:
             row = [true, true, true];
             this.matrice.push(row);
             row = [false, false, true];
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.east:
+          case CardinalPoint.east:
             row = [false, true];
             this.matrice.push(row);
             row = [false, true];
@@ -219,7 +231,7 @@ export class TetrominoBuilder {
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.west:
+          case CardinalPoint.west:
             row = [true, true];
             this.matrice.push(row);
             row = [true, false];
@@ -232,21 +244,21 @@ export class TetrominoBuilder {
 
       case 'L':
         switch (this.cardinalPoint) {
-          case CardinalPoints.north:
+          case CardinalPoint.north:
             row = [false, false, true];
             this.matrice.push(row);
             row = [true, true, true];
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.south:
+          case CardinalPoint.south:
             row = [true, true, true];
             this.matrice.push(row);
             row = [true, false, false];
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.east:
+          case CardinalPoint.east:
             row = [true, true];
             this.matrice.push(row);
             row = [false, true];
@@ -255,7 +267,7 @@ export class TetrominoBuilder {
             this.matrice.push(row);
             break;
 
-          case CardinalPoints.west:
+          case CardinalPoint.west:
             row = [true, false];
             this.matrice.push(row);
             row = [true, false];
@@ -274,7 +286,7 @@ export class TetrominoBuilder {
 
     switch (this.tetrominoType) {
       case 'I':
-        if (this.cardinalPoint === CardinalPoints.north || this.cardinalPoint === CardinalPoints.south) {
+        if (this.cardinalPoint === CardinalPoint.north || this.cardinalPoint === CardinalPoint.south) {
           w = 4;
           h = 1;
         }
@@ -290,7 +302,7 @@ export class TetrominoBuilder {
         break;
 
       default:
-        if (this.cardinalPoint === CardinalPoints.north || this.cardinalPoint === CardinalPoints.south) {
+        if (this.cardinalPoint === CardinalPoint.north || this.cardinalPoint === CardinalPoint.south) {
           w = 3;
           h = 2;
         }

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 
-import { CardinalPoints } from '../common/cardinal-points-enum';
+import { CardinalPoint } from '../common/cardinal-points-enum';
 import { GameState } from '../common/game-state-enum';
 import { TetrominoBuilder } from '../common/tetromino-builder';
+import { TetrominoInfo } from '../models/tetromino-info';
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +32,7 @@ export class GameService {
   public readonly boardCols = 10;
 
   public running = false;
-  public intervalle = 400;
+  public intervalle = 300;
   public timerHandle: any = null;
 
   public nextTetromino$: Observable<string>;
@@ -70,10 +71,9 @@ export class GameService {
   }
 
   // génère le html d'un tétromino.
-  public generateTetromino(tetrominoType: string, cp: CardinalPoints, cellSize: number, showBorder: boolean = false): string {
+  public generateTetromino(tetrominoType: string, cp: CardinalPoint, cellSize: number, showBorder: boolean = false): TetrominoInfo {
     const tetrominoBuilder = new TetrominoBuilder(tetrominoType, cp, cellSize, showBorder);
-
-    return tetrominoBuilder.getHtml();
+    return  tetrominoBuilder.tetrominoInfo();
   }
 
   // get un tetrominoType au hasard et le swing dans le sujet
@@ -109,7 +109,8 @@ export class GameService {
   // properties
 
   public get currentGameState(): GameState {
-    return this.currentGameStateSubject.getValue();
+    const value = this.currentGameStateSubject.getValue();
+    return value;
   }
 
   public get boardHeight(): number {

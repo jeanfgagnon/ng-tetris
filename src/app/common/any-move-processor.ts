@@ -3,7 +3,7 @@ import { style, animate, keyframes, AnimationStyleMetadata, AnimationBuilder } f
 import { ElementRef } from '@angular/core';
 
 import { AfterMoveCallback, AnyMoveInfo } from '../models/any-move-info';
-import { CardinalPoints } from './cardinal-points-enum';
+import { CardinalPoint } from './cardinal-points-enum';
 
 export class AnyMoveProcessor {
   private moveInfo: AnyMoveInfo;
@@ -68,22 +68,22 @@ export class AnyMoveProcessor {
 
   private calcFutureCoords(): void {
     switch (this.moveInfo.direction) {
-      case CardinalPoints.north:
+      case CardinalPoint.north:
         this.moveInfo.futureCoords.y = this.moveInfo.coords.y - this.moveInfo.distance;
         this.moveInfo.futureCoords.x = this.moveInfo.coords.x;
         break;
 
-      case CardinalPoints.east:
+      case CardinalPoint.east:
         this.moveInfo.futureCoords.x = this.moveInfo.coords.x + this.moveInfo.distance;
         this.moveInfo.futureCoords.y = this.moveInfo.coords.y;
         break;
 
-      case CardinalPoints.south:
+      case CardinalPoint.south:
         this.moveInfo.futureCoords.y = this.moveInfo.coords.y + this.moveInfo.distance;
         this.moveInfo.futureCoords.x = this.moveInfo.coords.x;
         break;
 
-      case CardinalPoints.west:
+      case CardinalPoint.west:
         this.moveInfo.futureCoords.x = this.moveInfo.coords.x - this.moveInfo.distance;
         this.moveInfo.futureCoords.y = this.moveInfo.coords.y;
         break;
