@@ -18,12 +18,12 @@ import { TetrominoInfo } from 'src/app/models/tetromino-info';
   styleUrls: ['./play-field.component.scss']
 })
 export class PlayFieldComponent implements AfterViewInit, OnInit {
+  private readonly SPACEBAR = ' ';
   private pieceCoords: CartesianCoords;
   private readonly fieldHeight = this.gameService.cellSize * (this.gameService.boardRows);
   private readonly fieldWidth = this.gameService.cellSize * (this.gameService.boardCols);
   private cpArray: CardinalPoint[];
   private currentCP = 0;
-  private isAnimating = false;
   private keyQueue = new DataQueue();
   private previousGameState = GameState.stopped;
   private tetrominoInfo: TetrominoInfo;
@@ -79,43 +79,106 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
     this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.tetrominoInfo.html);
   }
 
-  @HostListener('window:keyup', ['$event'])
+  @HostListener('window:keydown', ['$event'])
   public keypressHandler = (e: KeyboardEvent): void => {
-    if (!this.isAnimating) {
-      switch (e.key) {
-        case "ArrowUp":
-          this.currentCP++;
-          if (this.currentCP > 3) {
-            this.currentCP = 0;
-          }
-          this.tetrominoInfo = this.gameService.generateTetromino(this.gameService.getCurrentTetrominoType(), this.cpArray[this.currentCP], this.gameService.cellSize, true);
-          this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.tetrominoInfo.html);
-          break;
-
-        case "ArrowLeft":
-          if (this.pieceCanMove(CardinalPoint.east)) {
-            this.pieceCoords.x -= this.gameService.cellSize;
-            this.placePiece();
-          }
-          break;
-
-        case "ArrowRight":
-          if (this.pieceCanMove(CardinalPoint.west)) {
-            this.pieceCoords.x += this.gameService.cellSize;
-            this.placePiece();
-          }
-          break;
+    if (e.key === "Escape") {
+      if (this.gameService.currentGameState === GameState.started) {
+        this.gameService.gameState(GameState.pausing);
+      }
+      else {
+        this.gameService.gameState(GameState.started);
       }
     }
     else {
-      this.keyQueue.enqueue(e.key);
-      console.log('Key missed: %s', e.key);
+      if (this.gameService.currentGameState === GameState.started) {
+        switch (e.key) {
+          case this.SPACEBAR: // drop
+            while (this.pieceCanMove(CardinalPoint.south)) {
+              this.pieceCoords.y += this.gameService.cellSize;
+            }
+            this.placePiece();
+            break;
+
+          case "ArrowDown": // speed up
+            if (this.pieceCanMove(CardinalPoint.south)) {
+              this.pieceCoords.y += this.gameService.cellSize;
+              this.placePiece();
+            }
+            break;
+
+          case "ArrowUp": // rotate
+            const previousCurrentCP = this.currentCP;
+            this.currentCP++;
+            if (this.currentCP > 3) {
+              this.currentCP = 0;
+            }
+
+            this.tetrominoInfo = this.gameService.generateTetromino(this.gameService.getCurrentTetrominoType(), this.cpArray[this.currentCP], this.gameService.cellSize, true);
+
+            if (!this.isRotationValid()) {
+              this.currentCP = previousCurrentCP;
+              this.tetrominoInfo = this.gameService.generateTetromino(this.gameService.getCurrentTetrominoType(), this.cpArray[this.currentCP], this.gameService.cellSize, true);
+            }
+
+            if (this.isWallInDirection(CardinalPoint.west)) {
+              this.pieceCoords.x = this.fieldWidth - this.tetrominoInfo.width;
+              this.placePiece();
+            }
+            else if (this.isWallInDirection(CardinalPoint.south)) {
+              this.pieceCoords.y = this.fieldHeight - this.tetrominoInfo.height;
+              this.placePiece();
+            }
+
+            this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.tetrominoInfo.html);
+            break;
+
+          case "ArrowLeft":
+            if (this.pieceCanMove(CardinalPoint.east)) {
+              this.pieceCoords.x -= this.gameService.cellSize;
+              this.placePiece();
+            }
+            break;
+
+          case "ArrowRight":
+            if (this.pieceCanMove(CardinalPoint.west)) {
+              this.pieceCoords.x += this.gameService.cellSize;
+              this.placePiece();
+            }
+            break;
+        }
+      }
     }
     e.preventDefault(); // ツ
     e.stopPropagation();
   }
 
   // privates
+
+  private isRotationValid(): boolean {
+    let rv = true;
+    let myX = this.pieceCoords.x;
+    let myY = this.pieceCoords.y;
+
+    if (this.isWallInDirection(CardinalPoint.west)) {
+      myX = this.fieldWidth - this.tetrominoInfo.width;
+    }
+    if (this.isWallInDirection(CardinalPoint.south)) {
+      myY = this.fieldHeight - this.tetrominoInfo.height;
+    }
+
+    for (let row = 0; row < this.tetrominoInfo.matrice.length; row++) {
+      for (let col = 0; col < this.tetrominoInfo.matrice[row].length; col++) {
+        if (this.tetrominoInfo.matrice[row][col]) {
+          const tile = this.getTableauTile(myX + (col * this.gameService.cellSize), myY + (row * this.gameService.cellSize));
+          if (!tile.free) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return rv;
+  }
 
   // main game loooooooop
   private runGame(): void {
@@ -139,14 +202,14 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   private pieceCanMove(cp: CardinalPoint): boolean {
     let canMove = !this.isWallInDirection(cp);
     if (canMove) {
-      const cartesianCoords = this.getCoordOfCarreauInDirection(cp);
-      canMove = this.canMoveInDirection(cp, cartesianCoords);
+      canMove = this.canMoveInDirection(cp);
     }
 
     return canMove;
   }
 
-  private canMoveInDirection(cp: CardinalPoint, cartesianCoords: CartesianCoords[]): boolean {
+  private canMoveInDirection(cp: CardinalPoint): boolean {
+    const cartesianCoords = this.getCoordOfCarreauInDirection(cp);
     for (let i = 0; i < cartesianCoords.length; i++) {
       const tile = this.getTableauNextTile(cp, cartesianCoords[i]);
       if (tile && !tile.free) {

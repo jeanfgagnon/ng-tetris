@@ -21,6 +21,16 @@ export class GameControlComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.gameService.currentGameState$.subscribe((gs: GameState) => {
+      if (this.gameService.currentGameState !== GameState.stopped) {
+        if (this.gameService.currentGameState === GameState.started) {
+          this.btnPauseText = 'Pause';
+        }
+        else {
+          this.btnPauseText = 'Resume';
+        }
+      }
+    });
   }
 
   // event handlers

@@ -32,7 +32,7 @@ export class GameService {
   public readonly boardCols = 10;
 
   public running = false;
-  public intervalle = 300;
+  public intervalle = 500;
   public timerHandle: any = null;
 
   public nextTetromino$: Observable<string>;
