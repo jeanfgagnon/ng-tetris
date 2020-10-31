@@ -184,11 +184,11 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   private runGame(): void {
     let busted = false;
     interval(this.gameService.intervalle).pipe(takeWhile(x => !busted && this.gameService.currentGameState === GameState.started)).subscribe(() => {
+      console.log('game loop %s', this.tableau.length);
       //busted = true; // this.fieldOverload(); // dans ces eaux ... set a game a stop et bye
       if (!this.pieceCanMove(CardinalPoint.south)) {
         this.mergePiece();
-        //this.gameService.setGameState(GameState.pausing);
-        //this.resetPieceCourse();
+        this.clearLines();
         this.cleanup();
         this.gameService.nextTetromino();
       }
@@ -196,6 +196,69 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
         this.moveDown();
       }
     });
+  }
+
+  private wipeRow(rowNo: number): void {
+    for (let col = 0; col < this.gameService.boardCols; col++) {
+      this.tableau[rowNo][col].bgColor = this.gameService.fieldBgColor;
+    }
+    console.log('wipe row %s', rowNo);
+
+    // interval(100).pipe(takeWhile(x => col < this.gameService.boardCols)).subscribe(() => {
+    //   this.tableau[rowNo][col].bgColor = this.gameService.fieldBgColor;
+    //   col++;
+    // });
+  }
+
+  private clearLines(): void {
+    let nbRowCleared = 0;
+    let fullRowIndex = this.getLastFullRowIndex();
+    while (fullRowIndex > -1) {
+      nbRowCleared++;
+      this.wipeRow(fullRowIndex);
+      this.dropAllRows(fullRowIndex);
+      fullRowIndex = this.getLastFullRowIndex();
+    }
+  }
+
+  private getLastFullRowIndex(): number {
+    for (let row = this.gameService.boardRows - 1; row > 0; row--) {
+      if (this.isRowFull(row)) {
+        return row;
+      }
+    }
+
+    return -1;
+  }
+
+  private dropAllRows(startingRow: number): void {
+    let row = startingRow;
+
+    for (; row > 0; row--) {
+      for (let col = 0; col < this.gameService.boardCols; col++) {
+        this.dropTile(row, col);
+      }
+    };
+  }
+
+  private dropTile(row: number, col: number) {
+    if (row > 0) {
+      this.tableau[row][col].bgColor = this.tableau[row - 1][col].bgColor;
+      this.tableau[row][col].free = this.tableau[row - 1][col].free;
+      this.tableau[row - 1][col].free = true;
+      this.tableau[row - 1][col].bgColor = this.gameService.fieldBgColor;
+    }
+  }
+
+  private isRowFull(row: number): boolean {
+    let rv = true;
+    for (let col = 0; col < this.gameService.boardCols; col++) {
+      if (this.tableau[row][col].free) {
+        return false;
+      }
+    }
+
+    return rv;
   }
 
   // évalue si la pièce peut aller dans la direction voulue
@@ -307,7 +370,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
     return isWall;
   }
 
-  // ajouter la pièce dans le tableau!!
+  // ajouter la pièce dans le tableau
   private mergePiece(): void {
     this.tetrominoInfo.matrice.forEach((row: boolean[], indexY: number) => {
       row.forEach((state: boolean, indexX: number) => {
@@ -364,23 +427,28 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
 
   private buildTableau(): void {
     this.tableau = [];
-    for (let row = this.gameService.boardRows - 1; row >= 0; row--) {
-      const tileRow = [];
-      for (let col = 0; col < this.gameService.boardCols; col++) {
-        const tileModel: TileModel = {
-          isBorder: false,
-          bgColor: '#888888',
-          size: this.gameService.cellSize,
-          free: true,
-          coords: {
-            x: col * this.gameService.cellSize,
-            y: row * this.gameService.cellSize
-          }
-        };
-        tileRow.push(tileModel);
-      }
+    for (let row = 0; row < this.gameService.boardRows; row++) {
+      const tileRow = this.tableauRow(row);
       this.tableau.push(tileRow);
     }
+  }
+
+  private tableauRow(row: number): TileModel[] {
+    const tileRow: TileModel[] = [];
+    for (let col = 0; col < this.gameService.boardCols; col++) {
+      const tileModel: TileModel = {
+        isBorder: false,
+        bgColor: this.gameService.fieldBgColor,
+        size: this.gameService.cellSize,
+        free: true,
+        coords: {
+          x: col * this.gameService.cellSize,
+          y: row * this.gameService.cellSize
+        }
+      };
+      tileRow.push(tileModel);
+    }
+    return tileRow;
   }
 
   private initCpStuff(): void {
@@ -393,7 +461,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
     this.currentCP = 0;
   }
 
-  // place la pièce (un tétromino quelconque) au bon endroit sur le plan cartésien du field
+  // place la pièce au bon endroit sur le plan cartésien du field
   private placePiece(): void {
     this.renderer.setStyle(this.piece.nativeElement, 'left', `${this.pieceCoords.x}px`);
     this.renderer.setStyle(this.piece.nativeElement, 'top', `${this.pieceCoords.y}px`);

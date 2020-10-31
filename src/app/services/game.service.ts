@@ -24,12 +24,13 @@ export class GameService {
   private readonly minInterval = 200;
 
   // tétriste lol
-  public readonly name = 'Tétriste';
-  public readonly version = '1.0a';
+  public readonly name = 'Tetris';
+  public readonly version = '0.1a';
 
   public readonly cellSize = 30;
   public readonly boardRows = 24;
   public readonly boardCols = 10;
+  public readonly fieldBgColor = '#888888';
 
   public running = false;
   public intervalle = 500;

@@ -86,6 +86,10 @@ export class BoardComponent implements OnInit {
     return tms;
   }
 
+  public getTileNo(y: number): string {
+    return ((y / this.gameService.cellSize) - 1).toString();
+  }
+
   // properties
 
   public get getDynaStyle(): Object {
