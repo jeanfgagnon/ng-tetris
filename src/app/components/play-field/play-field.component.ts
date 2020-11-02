@@ -6,7 +6,6 @@ import { takeWhile } from "rxjs/operators";
 
 import { CardinalPoint } from 'src/app/common/cardinal-points-enum';
 import { CartesianCoords } from 'src/app/models/cartesian-coords';
-import { DataQueue } from 'src/app/common/data-queue';
 import { GameService } from 'src/app/services/game.service';
 import { TileModel } from 'src/app/models/tile-model';
 import { GameState } from 'src/app/common/game-state-enum';
@@ -19,12 +18,11 @@ import { TetrominoInfo } from 'src/app/models/tetromino-info';
 })
 export class PlayFieldComponent implements AfterViewInit, OnInit {
   private readonly SPACEBAR = ' ';
-  private pieceCoords: CartesianCoords;
   private readonly fieldHeight = this.gameService.cellSize * (this.gameService.boardRows);
   private readonly fieldWidth = this.gameService.cellSize * (this.gameService.boardCols);
+  private pieceCoords: CartesianCoords;
   private cpArray: CardinalPoint[];
   private currentCP = 0;
-  private keyQueue = new DataQueue();
   private previousGameState = GameState.stopped;
   private tetrominoInfo: TetrominoInfo;
 
@@ -83,20 +81,17 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   public keypressHandler = (e: KeyboardEvent): void => {
     if (e.key === "Escape") {
       if (this.gameService.currentGameState === GameState.started) {
-        this.gameService.gameState(GameState.pausing);
+        this.gameService.setGameState(GameState.pausing);
       }
       else {
-        this.gameService.gameState(GameState.started);
+        this.gameService.setGameState(GameState.started);
       }
     }
     else {
       if (this.gameService.currentGameState === GameState.started) {
         switch (e.key) {
           case this.SPACEBAR: // drop
-            while (this.pieceCanMove(CardinalPoint.south)) {
-              this.pieceCoords.y += this.gameService.cellSize;
-            }
-            this.placePiece();
+            this.dropPiece();
             break;
 
           case "ArrowDown": // speed up
@@ -154,6 +149,16 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
 
   // privates
 
+  private dropPiece() {
+    let nbMove = 0;
+    while (this.pieceCanMove(CardinalPoint.south)) {
+      this.pieceCoords.y += this.gameService.cellSize;
+      nbMove++;
+    }
+    this.gameService.incrementScore(nbMove);
+    this.placePiece();
+  }
+
   private isRotationValid(): boolean {
     let rv = true;
     let myX = this.pieceCoords.x;
@@ -183,40 +188,50 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   // main game loooooooop
   private runGame(): void {
     let busted = false;
-    interval(this.gameService.intervalle).pipe(takeWhile(x => !busted && this.gameService.currentGameState === GameState.started)).subscribe(() => {
-      console.log('game loop %s', this.tableau.length);
-      //busted = true; // this.fieldOverload(); // dans ces eaux ... set a game a stop et bye
-      if (!this.pieceCanMove(CardinalPoint.south)) {
-        this.mergePiece();
-        this.clearLines();
-        this.cleanup();
-        this.gameService.nextTetromino();
+    interval(this.gameService.intervalle).pipe(takeWhile(x => !busted && this.gameService.currentGameState === GameState.started)).subscribe((k: number) => {
+      if (this.pieceCanMove(CardinalPoint.south)) {
+        this.moveDown();
+      }
+      else if (this.pieceCoords.y === 0) {
+        busted = true;
+        this.evaluateMerge();
+        this.gameService.setMessage('Busted!!!');
+        this.gameService.setGameState(GameState.stopped);
       }
       else {
-        this.moveDown();
+        this.mergePiece();
+        this.clearFullLines();
+        this.cleanup();
+        this.gameService.nextTetromino();
       }
     });
   }
 
-  private wipeRow(rowNo: number): void {
-    for (let col = 0; col < this.gameService.boardCols; col++) {
-      this.tableau[rowNo][col].bgColor = this.gameService.fieldBgColor;
+  // si la pièce est trop haute, elle n'est pas mergée dans le tableau et crame
+  private evaluateMerge(): void {
+    const nbFreeRow = this.getTopFreeRowCount();
+    if (nbFreeRow * this.gameService.cellSize >= this.tetrominoInfo.height) {
+      this.mergePiece();
     }
-    console.log('wipe row %s', rowNo);
-
-    // interval(100).pipe(takeWhile(x => col < this.gameService.boardCols)).subscribe(() => {
-    //   this.tableau[rowNo][col].bgColor = this.gameService.fieldBgColor;
-    //   col++;
-    // });
   }
 
-  private clearLines(): void {
-    let nbRowCleared = 0;
+  private getTopFreeRowCount(): number {
+    let rowIndex = 0;
+    for (; rowIndex < this.tableau.length; rowIndex++) {
+      if (this.tableau[rowIndex].filter(x => x.free).length !== this.gameService.boardCols) {
+        break;
+      }
+    }
+
+    return rowIndex;
+  }
+
+  private clearFullLines(): void {
     let fullRowIndex = this.getLastFullRowIndex();
     while (fullRowIndex > -1) {
-      nbRowCleared++;
-      this.wipeRow(fullRowIndex);
+      this.gameService.setValue('lines', this.gameService.getValue('lines') + 1);
       this.dropAllRows(fullRowIndex);
+
       fullRowIndex = this.getLastFullRowIndex();
     }
   }
@@ -238,7 +253,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
       for (let col = 0; col < this.gameService.boardCols; col++) {
         this.dropTile(row, col);
       }
-    };
+    }
   }
 
   private dropTile(row: number, col: number) {
@@ -251,14 +266,13 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   }
 
   private isRowFull(row: number): boolean {
-    let rv = true;
     for (let col = 0; col < this.gameService.boardCols; col++) {
       if (this.tableau[row][col].free) {
         return false;
       }
     }
 
-    return rv;
+    return true;
   }
 
   // évalue si la pièce peut aller dans la direction voulue
@@ -405,8 +419,6 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   }
 
   getTableauTile(tileX: number, tileY: number): TileModel {
-    let rv: TileModel = null;
-
     for (let row = 0; row < this.tableau.length; row++) {
       for (let col = 0; col < this.tableau[row].length; col++) {
         const tile = this.tableau[row][col];
@@ -416,7 +428,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
       }
     }
 
-    return rv;
+    return null;
   }
 
   // déplace la pièce d'un cellSize vers le bas
@@ -428,16 +440,16 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   private buildTableau(): void {
     this.tableau = [];
     for (let row = 0; row < this.gameService.boardRows; row++) {
-      const tileRow = this.tableauRow(row);
-      this.tableau.push(tileRow);
+      this.tableau.push(this.getTableauRow(row));
     }
   }
 
-  private tableauRow(row: number): TileModel[] {
+  private getTableauRow(row: number): TileModel[] {
     const tileRow: TileModel[] = [];
     for (let col = 0; col < this.gameService.boardCols; col++) {
       const tileModel: TileModel = {
         isBorder: false,
+        corner: 0,
         bgColor: this.gameService.fieldBgColor,
         size: this.gameService.cellSize,
         free: true,
@@ -448,6 +460,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
       };
       tileRow.push(tileModel);
     }
+
     return tileRow;
   }
 

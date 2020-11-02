@@ -11,8 +11,7 @@ import { TetrominoInfo } from '../models/tetromino-info';
 })
 export class GameService {
 
-  private validKeys: string[] = [];
-  private keypressSubject = new Subject<KeyboardEvent>();
+  private messageSubject = new Subject<string>();
   private nextTetrominoSubject = new Subject<string>();
   private currentTetrominoSubject = new Subject<string>();
   private currentGameStateSubject = new BehaviorSubject<GameState>(GameState.stopped);
@@ -36,30 +35,43 @@ export class GameService {
   public intervalle = 500;
   public timerHandle: any = null;
 
+  public message$: Observable<string>;
   public nextTetromino$: Observable<string>;
   public currentTetromino$: Observable<string>;
   public currentGameState$: Observable<GameState>;
 
   constructor(
   ) {
+    this.message$ = this.messageSubject.asObservable();
     this.nextTetromino$ = this.nextTetrominoSubject.asObservable();
     this.currentTetromino$ = this.currentTetrominoSubject.asObservable();
     this.currentGameState$ = this.currentGameStateSubject.asObservable();
 
-    this.multiValue.set('elapsed', 69);
+    this.multiValue.set('elapsed', 0);
     this.multiValue.set('score', 0);
     this.multiValue.set('lines', 0);
   }
 
-  public setGameState(gs: GameState) : void {
+  public setGameState(gs: GameState): void {
+    this.setElapsed(gs);
     this.currentGameStateSubject.next(gs);
-  }
-
-  public dispose(): void {
   }
 
   public getCurrentTetrominoType(): string {
     return this.currentTetrominoType;
+  }
+
+  public setMessage(m: string): void {
+    this.messageSubject.next(m);
+  }
+
+  public incrementScore(v: number): number {
+    this.multiValue.set('score', this.multiValue.get('score') + v);
+    return this.multiValue.get('score');
+  }
+
+  public setValue(name: string, value: any): void {
+    this.multiValue.set(name, value);
   }
 
   public getValue(name: string): number {
@@ -90,10 +102,6 @@ export class GameService {
     this.nextTetrominoSubject.next(this.nextTetrominoType);
   }
 
-  public gameState(gs: GameState): void {
-    this.currentGameStateSubject.next(gs);
-  }
-
   // privates
 
   private getRandomTetromino(): string {
@@ -105,6 +113,27 @@ export class GameService {
 
   private getTetreominosType(): string[] {
     return ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+  }
+
+  private setElapsed(gs: GameState) {
+    if (gs === GameState.stopped) {
+      clearInterval(this.timerHandle);
+    }
+    else if (gs === GameState.pausing) {
+      clearInterval(this.timerHandle);
+    }
+    else if (gs === GameState.started) {
+      if (this.currentGameState === GameState.stopped) {
+        this.multiValue.set('elapsed', 0);
+        this.multiValue.set('lines', 0);
+        this.multiValue.set('score', 0);
+      }
+      this.timerHandle = setInterval(() => this.elapsed(), 1000);
+    }
+  }
+
+  private elapsed(): void {
+    this.multiValue.set('elapsed', this.getValue('elapsed') + 1);
   }
 
   // properties

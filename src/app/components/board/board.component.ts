@@ -26,6 +26,7 @@ export class BoardComponent implements OnInit {
       for (let i = 1; i < this.gameService.boardCols + 1; i++) {
         const tile: TileModel = {
           isBorder: true,
+          corner: 0,
           bgColor: '',
           size: this.gameService.cellSize,
           free: false,
@@ -41,6 +42,7 @@ export class BoardComponent implements OnInit {
       for (let i = 1; i < this.gameService.boardCols + 1; i++) {
         const tile: TileModel = {
           isBorder: true,
+          corner: 0,
           bgColor: '',
           size: this.gameService.cellSize,
           free: false,
@@ -56,6 +58,7 @@ export class BoardComponent implements OnInit {
       for (let i = 0; i < this.gameService.boardRows + 2; i++) {
         const tile: TileModel = {
           isBorder: true,
+          corner: (i === 0 ? 1 : i === this.gameService.boardRows + 1 ? 3 : 0),
           bgColor: '',
           size: this.gameService.cellSize,
           free: false,
@@ -71,6 +74,7 @@ export class BoardComponent implements OnInit {
       for (let i = 0; i < this.gameService.boardRows + 2; i++) {
         const tile: TileModel = {
           isBorder: true,
+          corner: (i === 0 ? 2 : i === this.gameService.boardRows + 1 ? 4 : 0),
           bgColor: '',
           size: this.gameService.cellSize,
           free: false,
@@ -94,7 +98,7 @@ export class BoardComponent implements OnInit {
 
   public get getDynaStyle(): Object {
     return {
-      backgroundColor: '#444444',
+      //backgroundColor: '#444444',
       position: 'relative',
       height: `${this.gameService.boardHeight}px`,
       width: `${this.gameService.boardWidth}px`,

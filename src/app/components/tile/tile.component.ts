@@ -34,6 +34,32 @@ export class TileComponent implements OnInit {
       boxShadow: 'inset 0 -1px 2px rgba(255,255,255,0.8), inset 0 1px 2px rgba(255,255,255,0.8)'
     };
 
+    if (this.Model.corner !== 0) {
+      //12
+      //34
+      switch (this.Model.corner) {
+        case 1:
+          Object.assign(style, {
+            borderTopLeftRadius: '9px'
+          });
+          break;
+        case 2:
+          Object.assign(style, {
+            borderTopRightRadius: '9px'
+          });
+          break;
+        case 3:
+          Object.assign(style, {
+            borderBottomLeftRadius: '9px'
+          });
+          break;
+        case 4:
+          Object.assign(style, {
+            borderBottomRightRadius: '9px'
+          });
+          break;
+      }
+    }
     if (this.Model.isBorder) {
       Object.assign(style, {
         backgroundColor: 'black',
