@@ -2,7 +2,7 @@ import { AnimationBuilder } from '@angular/animations';
 import { AfterViewInit, Component, ElementRef, HostListener, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { interval } from 'rxjs';
-import { takeWhile } from "rxjs/operators";
+import { takeWhile } from 'rxjs/operators';
 
 import { CardinalPoint } from 'src/app/common/cardinal-points-enum';
 import { CartesianCoords } from 'src/app/models/cartesian-coords';
@@ -73,13 +73,17 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
 
   public currentTetrominoHandler = (currentTetrominoType: string): void => {
     this.currentCP = 0;
-    this.tetrominoInfo = this.gameService.generateTetromino(currentTetrominoType, this.cpArray[this.currentCP], this.gameService.cellSize, true)
+    this.tetrominoInfo = this.gameService.generateTetromino(
+      currentTetrominoType,
+      this.cpArray[this.currentCP],
+      this.gameService.cellSize,
+      true);
     this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.tetrominoInfo.html);
   }
 
   @HostListener('window:keydown', ['$event'])
   public keypressHandler = (e: KeyboardEvent): void => {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       if (this.gameService.currentGameState === GameState.started) {
         this.gameService.setGameState(GameState.pausing);
       }
@@ -94,25 +98,33 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
             this.dropPiece();
             break;
 
-          case "ArrowDown": // speed up
+          case 'ArrowDown': // speed up
             if (this.pieceCanMove(CardinalPoint.south)) {
               this.pieceCoords.y += this.gameService.cellSize;
               this.placePiece();
             }
             break;
 
-          case "ArrowUp": // rotate
+          case 'ArrowUp': // rotate
             const previousCurrentCP = this.currentCP;
             this.currentCP++;
             if (this.currentCP > 3) {
               this.currentCP = 0;
             }
 
-            this.tetrominoInfo = this.gameService.generateTetromino(this.gameService.getCurrentTetrominoType(), this.cpArray[this.currentCP], this.gameService.cellSize, true);
+            this.tetrominoInfo = this.gameService.generateTetromino(
+              this.gameService.getCurrentTetrominoType(),
+              this.cpArray[this.currentCP],
+              this.gameService.cellSize,
+              true);
 
             if (!this.isRotationValid()) {
               this.currentCP = previousCurrentCP;
-              this.tetrominoInfo = this.gameService.generateTetromino(this.gameService.getCurrentTetrominoType(), this.cpArray[this.currentCP], this.gameService.cellSize, true);
+              this.tetrominoInfo = this.gameService.generateTetromino(
+                this.gameService.getCurrentTetrominoType(),
+                this.cpArray[this.currentCP],
+                this.gameService.cellSize,
+                true);
             }
 
             if (this.isWallInDirection(CardinalPoint.west)) {
@@ -127,14 +139,14 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
             this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(this.tetrominoInfo.html);
             break;
 
-          case "ArrowLeft":
+          case 'ArrowLeft':
             if (this.pieceCanMove(CardinalPoint.east)) {
               this.pieceCoords.x -= this.gameService.cellSize;
               this.placePiece();
             }
             break;
 
-          case "ArrowRight":
+          case 'ArrowRight':
             if (this.pieceCanMove(CardinalPoint.west)) {
               this.pieceCoords.x += this.gameService.cellSize;
               this.placePiece();
@@ -149,7 +161,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
 
   // privates
 
-  private dropPiece() {
+  private dropPiece(): void {
     let nbMove = 0;
     while (this.pieceCanMove(CardinalPoint.south)) {
       this.pieceCoords.y += this.gameService.cellSize;
@@ -160,7 +172,6 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   }
 
   private isRotationValid(): boolean {
-    let rv = true;
     let myX = this.pieceCoords.x;
     let myY = this.pieceCoords.y;
 
@@ -182,29 +193,31 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
       }
     }
 
-    return rv;
+    return true;
   }
 
   // main game loooooooop
   private runGame(): void {
     let busted = false;
-    interval(this.gameService.intervalle).pipe(takeWhile(x => !busted && this.gameService.currentGameState === GameState.started)).subscribe((k: number) => {
-      if (this.pieceCanMove(CardinalPoint.south)) {
-        this.moveDown();
-      }
-      else if (this.pieceCoords.y === 0) {
-        busted = true;
-        this.evaluateMerge();
-        this.gameService.setMessage('Busted!!!');
-        this.gameService.setGameState(GameState.stopped);
-      }
-      else {
-        this.mergePiece();
-        this.clearFullLines();
-        this.cleanup();
-        this.gameService.nextTetromino();
-      }
-    });
+    interval(this.gameService.intervalle)
+      .pipe(takeWhile(x => !busted && this.gameService.currentGameState === GameState.started))
+      .subscribe((k: number) => {
+        if (this.pieceCanMove(CardinalPoint.south)) {
+          this.moveDown();
+        }
+        else if (this.pieceCoords.y === 0) {
+          busted = true;
+          this.evaluateMerge();
+          this.gameService.setMessage('Busted!!!');
+          this.gameService.setGameState(GameState.stopped);
+        }
+        else {
+          this.mergePiece();
+          this.clearFullLines();
+          this.cleanup();
+          this.gameService.nextTetromino();
+        }
+      });
   }
 
   // si la pièce est trop haute, elle n'est pas mergée dans le tableau et crame
@@ -228,11 +241,16 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
 
   private clearFullLines(): void {
     let fullRowIndex = this.getLastFullRowIndex();
+    let nbFullRow = 0;
     while (fullRowIndex > -1) {
+      nbFullRow++;
       this.gameService.setValue('lines', this.gameService.getValue('lines') + 1);
       this.dropAllRows(fullRowIndex);
 
       fullRowIndex = this.getLastFullRowIndex();
+    }
+    if (nbFullRow) {
+      this.gameService.incrementScoreByFullLine(nbFullRow);
     }
   }
 
@@ -256,7 +274,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
     }
   }
 
-  private dropTile(row: number, col: number) {
+  private dropTile(row: number, col: number): void {
     if (row > 0) {
       this.tableau[row][col].bgColor = this.tableau[row - 1][col].bgColor;
       this.tableau[row][col].free = this.tableau[row - 1][col].free;
@@ -432,7 +450,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   }
 
   // déplace la pièce d'un cellSize vers le bas
-  private moveDown() {
+  private moveDown(): void {
     this.pieceCoords.y += this.gameService.cellSize;
     this.placePiece();
   }
@@ -490,14 +508,14 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
     };
   }
 
-  private cleanup() {
+  private cleanup(): void {
     this.resetPiece();
     this.placePiece();
   }
 
   // properties
 
-  public get getFieldStyle(): Object {
+  public get getFieldStyle(): object {
     return {
       position: 'absolute',
       top: `${this.gameService.cellSize}px`,

@@ -9,8 +9,8 @@ import { GameService } from 'src/app/services/game.service';
 })
 export class DisplayValueComponent implements OnInit {
 
-  private _label = 'x';
-  private _varName = '';
+  private label = 'x';
+  private varName = '';
 
   constructor(
     private gameService: GameService
@@ -22,23 +22,23 @@ export class DisplayValueComponent implements OnInit {
   // helpers
 
   public get Value(): string {
-    let v = this.gameService.getValue(this.VarName);
+    const v = this.gameService.getValue(this.VarName);
     return v.toString();
   }
 
   // properties
 
   @Input() public set Label(text: string) {
-    this._label = text;
+    this.label = text;
   }
   public get Label(): string {
-    return this._label;
+    return this.label;
   }
 
   @Input() public set VarName(name: string) {
-    this._varName = name;
+    this.varName = name;
   }
   public get VarName(): string {
-    return this._varName;
+    return this.varName;
   }
 }

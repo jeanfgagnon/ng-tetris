@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DomSanitizer, SafeHtml, SafeStyle } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { CardinalPoint } from 'src/app/common/cardinal-points-enum';
 import { GameService } from 'src/app/services/game.service';

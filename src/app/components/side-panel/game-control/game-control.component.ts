@@ -7,8 +7,7 @@ import { GameService } from 'src/app/services/game.service';
 @Component({
   selector: 'app-game-control',
   templateUrl: './game-control.component.html',
-  styleUrls: ['./game-control.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['./game-control.component.scss']
 })
 export class GameControlComponent implements OnInit {
 
@@ -16,8 +15,8 @@ export class GameControlComponent implements OnInit {
   public btnNewText = 'New';
   public notification = '';
 
-  @ViewChild("btnnew") btnNew: ElementRef;
-  @ViewChild("btnpause") btnPause: ElementRef;
+  @ViewChild('btnnew') btnNew: ElementRef;
+  @ViewChild('btnpause') btnPause: ElementRef;
 
   constructor(
     private gameService: GameService
@@ -44,10 +43,11 @@ export class GameControlComponent implements OnInit {
   public messageHandler = (msg: string): void => {
     this.notification = msg;
     console.log(msg);
-    //setTimeout(function() { this.notification = { msg: 'fuck' }}, 0);
+    setTimeout(() => { this.notification = ''; }, 5000);
   }
 
   public newGameClick(): void {
+    this.notification = '';
     this.btnNew.nativeElement.blur();
     if (this.gameService.currentGameState === GameState.stopped) {
       this.btnNewText = 'Stop';

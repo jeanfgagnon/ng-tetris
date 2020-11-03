@@ -96,9 +96,8 @@ export class BoardComponent implements OnInit {
 
   // properties
 
-  public get getDynaStyle(): Object {
+  public get getDynaStyle(): object {
     return {
-      //backgroundColor: '#444444',
       position: 'relative',
       height: `${this.gameService.boardHeight}px`,
       width: `${this.gameService.boardWidth}px`,

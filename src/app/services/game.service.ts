@@ -10,7 +10,6 @@ import { TetrominoInfo } from '../models/tetromino-info';
   providedIn: 'root'
 })
 export class GameService {
-
   private messageSubject = new Subject<string>();
   private nextTetrominoSubject = new Subject<string>();
   private currentTetrominoSubject = new Subject<string>();
@@ -20,12 +19,13 @@ export class GameService {
   private currentTetrominoType: string;
   private multiValue = new Map<string, number>();
 
+  private readonly linePerLevel = 10;
+
   private readonly minInterval = 200;
 
   // tétriste lol
   public readonly name = 'Tetris';
   public readonly version = '0.1a';
-
   public readonly cellSize = 30;
   public readonly boardRows = 24;
   public readonly boardCols = 10;
@@ -70,6 +70,15 @@ export class GameService {
     return this.multiValue.get('score');
   }
 
+  public incrementScoreByFullLine(nbFullRow: number): number {
+    const mult = this.getMultiplicator(nbFullRow);
+    return this.incrementScore(mult * (this.level() + 1));
+  }
+
+  public level(): number {
+    return Math.round(this.multiValue.get('lines') / this.linePerLevel);
+  }
+
   public setValue(name: string, value: any): void {
     this.multiValue.set(name, value);
   }
@@ -86,7 +95,7 @@ export class GameService {
   // génère le html d'un tétromino.
   public generateTetromino(tetrominoType: string, cp: CardinalPoint, cellSize: number, showBorder: boolean = false): TetrominoInfo {
     const tetrominoBuilder = new TetrominoBuilder(tetrominoType, cp, cellSize, showBorder);
-    return  tetrominoBuilder.tetrominoInfo();
+    return tetrominoBuilder.tetrominoInfo();
   }
 
   // get un tetrominoType au hasard et le swing dans le sujet
@@ -115,7 +124,7 @@ export class GameService {
     return ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
   }
 
-  private setElapsed(gs: GameState) {
+  private setElapsed(gs: GameState): void {
     if (gs === GameState.stopped) {
       clearInterval(this.timerHandle);
     }
@@ -134,6 +143,18 @@ export class GameService {
 
   private elapsed(): void {
     this.multiValue.set('elapsed', this.getValue('elapsed') + 1);
+  }
+
+  // source: https://tetris.wiki/Scoring
+  private getMultiplicator(nbFullRow: number): number {
+    switch (nbFullRow) {
+      case 1: return 40;
+      case 2: return 100;
+      case 3: return 300;
+      case 4: return 1200;
+    }
+
+    return 1;
   }
 
   // properties

@@ -8,7 +8,7 @@ import { TileModel } from 'src/app/models/tile-model';
 })
 export class TileComponent implements OnInit {
 
-  private _model: TileModel;
+  private model: TileModel;
 
   constructor() { }
 
@@ -18,14 +18,14 @@ export class TileComponent implements OnInit {
   // properties
 
   @Input() public set Model(tileModel: TileModel) {
-    this._model = tileModel;
+    this.model = tileModel;
   }
   public get Model(): TileModel {
-    return this._model;
+    return this.model;
   }
 
-  public get tileStyle(): Object {
-    let style: Object = {
+  public get tileStyle(): object {
+    const style: object = {
       position: 'absolute',
       top: `${this.Model.coords.y}px`,
       left: `${this.Model.coords.x}px`,
@@ -35,8 +35,8 @@ export class TileComponent implements OnInit {
     };
 
     if (this.Model.corner !== 0) {
-      //12
-      //34
+      // 1-2
+      // 3-4
       switch (this.Model.corner) {
         case 1:
           Object.assign(style, {

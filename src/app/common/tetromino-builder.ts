@@ -36,9 +36,9 @@ export class TetrominoBuilder {
 
     let html = `<div style="position: relative; width: ${styleWidth}px; height: ${styleHeight}px">`;
     html += this.placeCube();
-    html += "</div>";
+    html += '</div>';
 
-    return html
+    return html;
   }
 
   private placeCube(): string {
@@ -58,10 +58,10 @@ export class TetrominoBuilder {
     return html;
   }
 
-  private getBorderStyle() {
+  private getBorderStyle(): string {
     let rv = '';
     if (this.showBorder) {
-      rv = "box-shadow: rgba(255, 255, 255, 0.8) 0px -1px 2px inset, rgba(255, 255, 255, 0.8) 0px 1px 2px inset;"
+      rv = 'box-shadow: rgba(255, 255, 255, 0.8) 0px -1px 2px inset, rgba(255, 255, 255, 0.8) 0px 1px 2px inset;';
     }
 
     return rv;
@@ -282,7 +282,8 @@ export class TetrominoBuilder {
   //    return ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
 
   private getStyleWH(): any {
-    let w = 0, h = 0; // en nb cell
+    let w = 0;
+    let h = 0;
 
     switch (this.tetrominoType) {
       case 'I':
