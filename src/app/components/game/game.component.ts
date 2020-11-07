@@ -1,6 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-
-import { GameService } from 'src/app/services/game.service';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-game',
@@ -8,5 +6,5 @@ import { GameService } from 'src/app/services/game.service';
   styleUrls: ['./game.component.scss']
 })
 export class GameComponent {
-
+  // not much in here! ツ
 }

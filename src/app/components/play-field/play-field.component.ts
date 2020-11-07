@@ -155,8 +155,8 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
         }
       }
     }
-    e.preventDefault(); // ツ
-    e.stopPropagation();
+    //e.preventDefault(); // ツ
+    //e.stopPropagation();
   }
 
   // privates

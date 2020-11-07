@@ -58,7 +58,7 @@ export class GameService {
   }
 
   public setGameState(gs: GameState): void {
-    this.setElapsed(gs);
+    this.adjustState(gs);
     this.currentGameStateSubject.next(gs);
   }
 
@@ -108,6 +108,16 @@ export class GameService {
     return rv;
   }
 
+  public reset() {
+    this.multiValue.set('elapsed', 0);
+    this.multiValue.set('lines', 0);
+    this.multiValue.set('score', 0);
+
+    this.intervalle = this.startInterval;
+    this.stepperInvervalSubject.next(this.intervalle);
+    this.nextTetrominoType = '';
+  }
+
   // génère le html d'un tétromino.
   public generateTetromino(tetrominoType: string, cp: CardinalPoint, cellSize: number, showBorder: boolean = false): TetrominoInfo {
     const tetrominoBuilder = new TetrominoBuilder(tetrominoType, cp, cellSize, showBorder);
@@ -140,7 +150,7 @@ export class GameService {
     return ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
   }
 
-  private setElapsed(gs: GameState): void {
+  private adjustState(gs: GameState): void {
     if (gs === GameState.stopped) {
       clearInterval(this.timerHandle);
     }
@@ -149,9 +159,7 @@ export class GameService {
     }
     else if (gs === GameState.started) {
       if (this.currentGameState === GameState.stopped) {
-        this.multiValue.set('elapsed', 0);
-        this.multiValue.set('lines', 0);
-        this.multiValue.set('score', 0);
+        this.reset();
       }
       this.timerHandle = setInterval(() => this.elapsed(), 1000);
     }
@@ -168,9 +176,9 @@ export class GameService {
       case 2: return 100;
       case 3: return 300;
       case 4: return 1200;
-    }
 
-    return 1;
+      default: return 1;
+    }
   }
 
   // properties

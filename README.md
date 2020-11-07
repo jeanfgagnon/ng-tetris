@@ -28,6 +28,4 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ## Todo
 
-Reset intervalle on new game
-Reset next tetromino on game end
 High Score management
