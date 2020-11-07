@@ -197,29 +197,42 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   }
 
   // main game loooooooop
-  private runGame(): void {
+  private xxxrunGame(): void {
     let busted = false;
-    let mili = new Date().getMilliseconds();
     interval(this.gameService.intervalle)
       .pipe(takeWhile(x => !busted && this.gameService.currentGameState === GameState.started))
       .subscribe((k: number) => {
-        console.log('loopo');
-        if (this.pieceCanMove(CardinalPoint.south)) {
-          this.moveDown();
-        }
-        else if (this.pieceCoords.y === 0) {
-          busted = true;
-          this.evaluateMerge();
-          this.gameService.setMessage('Busted!!!');
-          this.gameService.setGameState(GameState.stopped);
-        }
-        else {
-          this.mergePiece();
-          this.clearFullLines();
-          this.cleanup();
-          this.gameService.nextTetromino();
-        }
+        busted = this.step();
       });
+  }
+
+  private runGame(): void {
+    setTimeout(() => {
+      if (this.gameService.currentGameState === GameState.started) {
+        if (!this.step()) {
+          this.runGame();
+        }
+      }
+    }, this.gameService.intervalle);
+  }
+
+  private step(): boolean {
+    if (this.pieceCanMove(CardinalPoint.south)) {
+      this.moveDown();
+    }
+    else if (this.pieceCoords.y === 0) {
+      this.evaluateMerge();
+      this.gameService.setMessage('Busted!!!');
+      this.gameService.setGameState(GameState.stopped);
+      return true;
+    }
+    else {
+      this.mergePiece();
+      this.clearFullLines();
+      this.cleanup();
+      this.gameService.nextTetromino();
+    }
+    return false;
   }
 
   // si la pièce est trop haute, elle n'est pas mergée dans le tableau et crame
