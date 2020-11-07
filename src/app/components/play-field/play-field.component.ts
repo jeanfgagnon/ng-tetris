@@ -2,7 +2,7 @@ import { AnimationBuilder } from '@angular/animations';
 import { AfterViewInit, Component, ElementRef, HostListener, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { interval } from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
+import { switchMap, takeWhile } from 'rxjs/operators';
 
 import { CardinalPoint } from 'src/app/common/cardinal-points-enum';
 import { CartesianCoords } from 'src/app/models/cartesian-coords';
@@ -197,7 +197,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   }
 
   // main game loooooooop
-  private xxxrunGame(): void {
+  private runGame_V1(): void {
     let busted = false;
     interval(this.gameService.intervalle)
       .pipe(takeWhile(x => !busted && this.gameService.currentGameState === GameState.started))
@@ -206,14 +206,25 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
       });
   }
 
-  private runGame(): void {
+  private runGame_V2(): void {
     setTimeout(() => {
       if (this.gameService.currentGameState === GameState.started) {
         if (!this.step()) {
-          this.runGame();
+          this.runGame_V2();
         }
       }
     }, this.gameService.intervalle);
+  }
+
+  private runGame() {
+    let busted = false;
+    this.gameService.stepperInverval$
+      .pipe(
+        switchMap(delay => interval(delay)),
+        takeWhile(x => !busted && this.gameService.currentGameState === GameState.started),
+      ).subscribe(() => {
+        busted = this.step();
+      });
   }
 
   private step(): boolean {

@@ -42,7 +42,6 @@ export class GameControlComponent implements OnInit {
 
   public messageHandler = (msg: string): void => {
     this.notification = msg;
-    console.log(msg);
     setTimeout(() => { this.notification = ''; }, 5000);
   }
 
@@ -75,5 +74,17 @@ export class GameControlComponent implements OnInit {
 
   public getMessage(): string {
     return this.notification;
+  }
+
+  public get isGameRunning(): boolean {
+    const rv = this.gameService.currentGameState === GameState.started ||
+               this.gameService.currentGameState === GameState.pausing;
+               console.log('Rv %s  state %s', rv, this.gameService.currentGameState);
+    return rv;
+  }
+
+  public get isGamePaused(): boolean {
+    const rv = this.gameService.currentGameState === GameState.pausing;
+    return rv;
   }
 }

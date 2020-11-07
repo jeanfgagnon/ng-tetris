@@ -32,7 +32,6 @@ export class GameService {
   public readonly fieldBgColor = '#888888';
 
   public running = false;
-  public intervalle = this.startInterval;
   public timerHandle: any = null;
 
   public message$: Observable<string>;
@@ -40,12 +39,18 @@ export class GameService {
   public currentTetromino$: Observable<string>;
   public currentGameState$: Observable<GameState>;
 
+  // game speed control
+  public intervalle = this.startInterval;
+  public  stepperInverval$: Observable<number>;
+  private stepperInvervalSubject = new BehaviorSubject<number>(this.intervalle)
+
   constructor(
   ) {
     this.message$ = this.messageSubject.asObservable();
     this.nextTetromino$ = this.nextTetrominoSubject.asObservable();
     this.currentTetromino$ = this.currentTetrominoSubject.asObservable();
     this.currentGameState$ = this.currentGameStateSubject.asObservable();
+    this.stepperInverval$ = this.stepperInvervalSubject.asObservable();
 
     this.multiValue.set('elapsed', 0);
     this.multiValue.set('score', 0);
@@ -67,10 +72,14 @@ export class GameService {
 
   public adjustLoopDelay(): void {
     const level = this.level();
+    const currentIntervalle = this.intervalle;
     if (level <= 8) {
       this.intervalle = this.startInterval - (level * 50);
+      if (currentIntervalle !== this.intervalle) {
+        this.stepperInvervalSubject.next(this.intervalle);
+        console.log('adjustLoopDelay level: %s, intervalle', level, this.intervalle);
+      }
     }
-    console.log('adjustLoopDelay level: %s, intervalle', level, this.intervalle);
   }
 
   public incrementScore(v: number): number {

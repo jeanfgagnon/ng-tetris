@@ -1,10 +1,10 @@
 <div class="game-control">
-  <button type="button" class="gc-button" (click)="newGameClick()" #btnnew>
+  <button type="button" class="gc-button" (click)="newGameClick()" #btnnew [disabled]="isGamePaused">
     {{ btnNewText }}<br />
     Game
   </button>
 
-  <button type="button" class="gc-button" (click)="pauseGameClick()" #btnpause>
+  <button type="button" class="gc-button" (click)="pauseGameClick()" #btnpause [disabled]="!isGameRunning">
     {{ btnPauseText }}<br />
     (esc)
   </button>
