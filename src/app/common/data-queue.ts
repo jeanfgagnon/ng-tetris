@@ -8,7 +8,6 @@ export class DataQueue {
   }
 
   public enqueue(item: any): void {
-    console.log('enqueue %s', item.toString());
     this.queue.push(item);
   }
 

@@ -79,7 +79,6 @@ export class GameControlComponent implements OnInit {
   public get isGameRunning(): boolean {
     const rv = this.gameService.currentGameState === GameState.started ||
                this.gameService.currentGameState === GameState.pausing;
-               console.log('Rv %s  state %s', rv, this.gameService.currentGameState);
     return rv;
   }
 

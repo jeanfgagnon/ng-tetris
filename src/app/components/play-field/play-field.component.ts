@@ -61,7 +61,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
       this.runGame();
     }
     else if (gs === GameState.pausing) {
-      console.log('Game is paused');
+      // nop
     }
     else {
       if (this.previousGameState === GameState.started) {

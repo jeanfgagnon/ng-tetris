@@ -77,7 +77,6 @@ export class GameService {
       this.intervalle = this.startInterval - (level * 50);
       if (currentIntervalle !== this.intervalle) {
         this.stepperInvervalSubject.next(this.intervalle);
-        console.log('adjustLoopDelay level: %s, intervalle', level, this.intervalle);
       }
     }
   }
