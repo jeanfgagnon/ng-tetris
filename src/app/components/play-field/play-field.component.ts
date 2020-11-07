@@ -199,9 +199,11 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   // main game loooooooop
   private runGame(): void {
     let busted = false;
+    let mili = new Date().getMilliseconds();
     interval(this.gameService.intervalle)
       .pipe(takeWhile(x => !busted && this.gameService.currentGameState === GameState.started))
       .subscribe((k: number) => {
+        console.log('loopo');
         if (this.pieceCanMove(CardinalPoint.south)) {
           this.moveDown();
         }
@@ -240,8 +242,9 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   }
 
   private clearFullLines(): void {
-    let fullRowIndex = this.getLastFullRowIndex();
     let nbFullRow = 0;
+    let fullRowIndex = this.getLastFullRowIndex();
+
     while (fullRowIndex > -1) {
       nbFullRow++;
       this.gameService.setValue('lines', this.gameService.getValue('lines') + 1);
@@ -249,8 +252,10 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
 
       fullRowIndex = this.getLastFullRowIndex();
     }
+
     if (nbFullRow) {
       this.gameService.incrementScoreByFullLine(nbFullRow);
+      this.gameService.adjustLoopDelay();
     }
   }
 

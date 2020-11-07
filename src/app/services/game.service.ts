@@ -21,7 +21,7 @@ export class GameService {
 
   private readonly linePerLevel = 10;
 
-  private readonly minInterval = 200;
+  private readonly startInterval = 500;
 
   // tétriste lol
   public readonly name = 'Tetris';
@@ -32,7 +32,7 @@ export class GameService {
   public readonly fieldBgColor = '#888888';
 
   public running = false;
-  public intervalle = 500;
+  public intervalle = this.startInterval;
   public timerHandle: any = null;
 
   public message$: Observable<string>;
@@ -65,6 +65,14 @@ export class GameService {
     this.messageSubject.next(m);
   }
 
+  public adjustLoopDelay(): void {
+    const level = this.level();
+    if (level <= 8) {
+      this.intervalle = this.startInterval - (level * 50);
+    }
+    console.log('adjustLoopDelay level: %s, intervalle', level, this.intervalle);
+  }
+
   public incrementScore(v: number): number {
     this.multiValue.set('score', this.multiValue.get('score') + v);
     return this.multiValue.get('score');
@@ -76,7 +84,7 @@ export class GameService {
   }
 
   public level(): number {
-    return Math.round(this.multiValue.get('lines') / this.linePerLevel);
+    return Math.floor(this.multiValue.get('lines') / this.linePerLevel);
   }
 
   public setValue(name: string, value: any): void {
