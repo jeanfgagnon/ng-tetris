@@ -87,7 +87,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
       if (this.gameService.currentGameState === GameState.started) {
         this.gameService.setGameState(GameState.pausing);
       }
-      else {
+      else if (this.gameService.currentGameState === GameState.pausing) {
         this.gameService.setGameState(GameState.started);
       }
     }
@@ -155,7 +155,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
         }
       }
     }
-    //e.preventDefault(); // ツ
+    //e.preventDefault();
     //e.stopPropagation();
   }
 
@@ -233,7 +233,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
     }
     else if (this.pieceCoords.y === 0) {
       this.evaluateMerge();
-      this.gameService.setMessage('Busted!!!');
+      this.gameService.setMessage({ message: 'Busted!!!', isEndGame: true });
       this.gameService.setGameState(GameState.stopped);
       return true;
     }

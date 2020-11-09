@@ -1,6 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FormsModule } from '@angular/forms';
+
+import { ModalModule } from './modules/modal';
 
 import { AppComponent } from './app.component';
 import { GameComponent } from './components/game/game.component';
@@ -34,7 +37,9 @@ import { PlayFieldComponent } from './components/play-field/play-field.component
   ],
   imports: [
     BrowserModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    FormsModule,
+    ModalModule
   ],
   providers: [],
   bootstrap: [AppComponent]

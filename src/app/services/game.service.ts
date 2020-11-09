@@ -4,13 +4,14 @@ import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { CardinalPoint } from '../common/cardinal-points-enum';
 import { GameState } from '../common/game-state-enum';
 import { TetrominoBuilder } from '../common/tetromino-builder';
+import { MessageModel } from '../models/message-model';
 import { TetrominoInfo } from '../models/tetromino-info';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
-  private messageSubject = new Subject<string>();
+  private messageSubject = new Subject<MessageModel>();
   private nextTetrominoSubject = new Subject<string>();
   private currentTetrominoSubject = new Subject<string>();
   private currentGameStateSubject = new BehaviorSubject<GameState>(GameState.stopped);
@@ -30,11 +31,12 @@ export class GameService {
   public readonly boardRows = 24;
   public readonly boardCols = 10;
   public readonly fieldBgColor = '#888888';
+  public readonly maxHighScore = 5;
 
   public running = false;
   public timerHandle: any = null;
 
-  public message$: Observable<string>;
+  public message$: Observable<MessageModel>;
   public nextTetromino$: Observable<string>;
   public currentTetromino$: Observable<string>;
   public currentGameState$: Observable<GameState>;
@@ -66,7 +68,7 @@ export class GameService {
     return this.currentTetrominoType;
   }
 
-  public setMessage(m: string): void {
+  public setMessage(m: MessageModel): void {
     this.messageSubject.next(m);
   }
 

@@ -2,7 +2,37 @@
   <div class="game-div-title">
     High Scores
   </div>
-  Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptatem dignissimos voluptatum officiis necessitatibus dolorem dolorum, fugiat illo, repellat consequuntur quos autem vero aut eaque! Odio molestias animi rerum tempora fugit!
-
-  Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit velit ex nihil voluptatibus animi distinctio reiciendis, incidunt voluptate, laboriosam ea rem cumque? Est saepe suscipit ea. Eveniet temporibus soluta incidunt.
+  <table class="cpc hs-table">
+    <tr class="title-row">
+      <td>Name</td>
+      <td>Date</td>
+      <td class='tar'>Score</td>
+      <td class='tar'>Lines</td>
+      <td class='tar'>elapsed</td>
+    </tr>
+    <tr *ngFor="let hs of this.highScoreList">
+      <td>{{ hs.name }}</td>
+      <td>{{ hs.date|date:'yyyy-MM-dd HH:mm' }}</td>
+      <td class='tar'>{{ hs.score }}</td>
+      <td class='tar'>{{ hs.lines }}</td>
+      <td class='tar'>{{ hs.elapsed }}</td>
+    </tr>
+  </table>
 </div>
+
+<jw-modal id="jw-modal-hs" [clickBgToClose]="false">
+  <div class='hs-modal'>
+    <div class='hs-inner-border tac'>
+      <img src="/assets/hs-stamp.png" width="180" /><br />
+      <div class="hs-name-label">
+        Please enter your name below
+      </div>
+      <input type="text" class="hs-name-input tac" maxlength="15" #nameinput [(ngModel)]="userName" />
+
+      <div class="hs-button-row">
+        <button (click)="closeModal('jw-modal-hs', false);">Cancel</button>&nbsp;&nbsp;
+        <button (click)="closeModal('jw-modal-hs', true);">Ok</button>
+      </div>
+    </div>
+  </div>
+</jw-modal>

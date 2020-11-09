@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy } from '@angular/core';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { GameState } from 'src/app/common/game-state-enum';
+import { MessageModel } from 'src/app/models/message-model';
 
 import { GameService } from 'src/app/services/game.service';
 
@@ -40,8 +41,8 @@ export class GameControlComponent implements OnInit {
 
   // event handlers
 
-  public messageHandler = (msg: string): void => {
-    this.notification = msg;
+  public messageHandler = (msg: MessageModel): void => {
+    this.notification = msg.message;
     setTimeout(() => { this.notification = ''; }, 5000);
   }
 
