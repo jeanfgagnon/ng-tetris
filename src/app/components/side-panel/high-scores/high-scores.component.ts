@@ -1,4 +1,6 @@
-import { Component, ElementRef, OnInit, ValueProvider, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ValueProvider, ViewChild } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { HighScoreModel } from 'src/app/models/highscore-model';
 import { MessageModel } from 'src/app/models/message-model';
@@ -11,8 +13,9 @@ import { GameService } from 'src/app/services/game.service';
   templateUrl: './high-scores.component.html',
   styleUrls: ['./high-scores.component.scss']
 })
-export class HighScoresComponent implements OnInit {
+export class HighScoresComponent implements OnInit, OnDestroy {
 
+  private unsubscribe$ = new Subject<void>();
   private readonly _storageKey = 'b3dingb3dang';
 
   public highScoreList: HighScoreModel[] = [];
@@ -26,17 +29,22 @@ export class HighScoresComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.gameService.message$.subscribe(this.messageHandler);
+    this.gameService.message$.pipe(takeUntil(this.unsubscribe$)).subscribe(this.messageHandler);
     this.highScoreList = this.loadHighScoreFromLocalStorage();
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   // event handlers
 
   public messageHandler = (msg: MessageModel): void => {
     if (msg.isEndGame) {
-      console.log('c tu un esti de high');
       if (this.isHighScore()) {
         this.openModal();
+        this.gameService.playSound("success");
       }
     }
   }

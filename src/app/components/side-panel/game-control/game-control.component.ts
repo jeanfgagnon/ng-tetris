@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, OnDestroy } from '@angular/core';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { GameState } from 'src/app/common/game-state-enum';
 import { MessageModel } from 'src/app/models/message-model';
 
@@ -10,7 +12,9 @@ import { GameService } from 'src/app/services/game.service';
   templateUrl: './game-control.component.html',
   styleUrls: ['./game-control.component.scss']
 })
-export class GameControlComponent implements OnInit {
+export class GameControlComponent implements OnInit, OnDestroy {
+
+  private unsubscribe$ = new Subject<void>();
 
   public btnPauseText = 'Pause';
   public btnNewText = 'New';
@@ -26,7 +30,7 @@ export class GameControlComponent implements OnInit {
   ngOnInit(): void {
     this.gameService.message$.subscribe(this.messageHandler);
 
-    this.gameService.currentGameState$.subscribe((gs: GameState) => {
+    this.gameService.currentGameState$.pipe(takeUntil(this.unsubscribe$)).subscribe((gs: GameState) => {
       if (this.gameService.currentGameState === GameState.stopped) {
         this.btnNewText = 'New';
       }
@@ -37,6 +41,11 @@ export class GameControlComponent implements OnInit {
         this.btnPauseText = 'Resume';
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   // event handlers

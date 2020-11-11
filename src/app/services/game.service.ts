@@ -110,6 +110,13 @@ export class GameService {
     return rv;
   }
 
+  public playSound(name: string): void {
+    const player = new Audio();
+    player.src = `/assets/${name}.wav`;
+    player.load();
+    player.play();
+  }
+
   public reset() {
     this.multiValue.set('elapsed', 0);
     this.multiValue.set('lines', 0);

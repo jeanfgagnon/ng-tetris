@@ -1,8 +1,8 @@
 import { AnimationBuilder } from '@angular/animations';
-import { AfterViewInit, Component, ElementRef, HostListener, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { interval } from 'rxjs';
-import { switchMap, takeWhile } from 'rxjs/operators';
+import { interval, Subject } from 'rxjs';
+import { switchMap, takeUntil, takeWhile } from 'rxjs/operators';
 
 import { CardinalPoint } from 'src/app/common/cardinal-points-enum';
 import { CartesianCoords } from 'src/app/models/cartesian-coords';
@@ -16,7 +16,10 @@ import { TetrominoInfo } from 'src/app/models/tetromino-info';
   templateUrl: './play-field.component.html',
   styleUrls: ['./play-field.component.scss']
 })
-export class PlayFieldComponent implements AfterViewInit, OnInit {
+export class PlayFieldComponent implements AfterViewInit, OnInit, OnDestroy {
+
+  private unsubscribe$ = new Subject<void>();
+
   private readonly SPACEBAR = ' ';
   private readonly fieldHeight = this.gameService.cellSize * (this.gameService.boardRows);
   private readonly fieldWidth = this.gameService.cellSize * (this.gameService.boardCols);
@@ -39,15 +42,21 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.gameService.currentGameState$.subscribe(this.currentGameStateHandler);
-    this.gameService.currentTetromino$.subscribe(this.currentTetrominoHandler);
+    this.gameService.currentGameState$.pipe(takeUntil(this.unsubscribe$)).subscribe(this.currentGameStateHandler);
+    this.gameService.currentTetromino$.pipe(takeUntil(this.unsubscribe$)).subscribe(this.currentTetrominoHandler);
     this.resetPiece();
     this.buildTableau();
     this.initCpStuff();
   }
 
-  public ngAfterViewInit(): void {
+  ngAfterViewInit(): void {
     this.placePiece();
+  }
+
+  ngOnDestroy(): void {
+    this.gameService.setGameState(GameState.stopped);
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   // Event handlers
@@ -197,25 +206,6 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
   }
 
   // main game loooooooop
-  private runGame_V1(): void {
-    let busted = false;
-    interval(this.gameService.intervalle)
-      .pipe(takeWhile(x => !busted && this.gameService.currentGameState === GameState.started))
-      .subscribe((k: number) => {
-        busted = this.step();
-      });
-  }
-
-  private runGame_V2(): void {
-    setTimeout(() => {
-      if (this.gameService.currentGameState === GameState.started) {
-        if (!this.step()) {
-          this.runGame_V2();
-        }
-      }
-    }, this.gameService.intervalle);
-  }
-
   private runGame() {
     let busted = false;
     this.gameService.stepperInverval$
@@ -278,6 +268,12 @@ export class PlayFieldComponent implements AfterViewInit, OnInit {
     }
 
     if (nbFullRow) {
+      if (nbFullRow === 4) {
+        this.gameService.playSound("clear");
+      }
+      else {
+        this.gameService.playSound("line");
+      }
       this.gameService.incrementScoreByFullLine(nbFullRow);
       this.gameService.adjustLoopDelay();
     }

@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { CardinalPoint } from 'src/app/common/cardinal-points-enum';
 import { GameService } from 'src/app/services/game.service';
@@ -9,7 +11,9 @@ import { GameService } from 'src/app/services/game.service';
   templateUrl: './next-piece.component.html',
   styleUrls: ['./next-piece.component.scss']
 })
-export class NextPieceComponent implements OnInit {
+export class NextPieceComponent implements OnInit, OnDestroy  {
+
+  private unsubscribe$ = new Subject<void>();
 
   public tetrominoHtml: SafeHtml = '';
   constructor(
@@ -18,10 +22,14 @@ export class NextPieceComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.gameService.nextTetromino$.subscribe((tt: string) => {
+    this.gameService.nextTetromino$.pipe(takeUntil(this.unsubscribe$)).subscribe((tt: string) => {
       const tetrominoInfo = this.gameService.generateTetromino(tt, CardinalPoint.north, 10);
       this.tetrominoHtml = this.sanitizer.bypassSecurityTrustHtml(tetrominoInfo.html);
     });
   }
 
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
 }
