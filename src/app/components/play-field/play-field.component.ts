@@ -164,8 +164,6 @@ export class PlayFieldComponent implements AfterViewInit, OnInit, OnDestroy {
         }
       }
     }
-    //e.preventDefault();
-    //e.stopPropagation();
   }
 
   // privates
@@ -206,7 +204,7 @@ export class PlayFieldComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   // main game loooooooop
-  private runGame() {
+  private runGame(): void {
     let busted = false;
     this.gameService.stepperInverval$
       .pipe(
@@ -269,10 +267,10 @@ export class PlayFieldComponent implements AfterViewInit, OnInit, OnDestroy {
 
     if (nbFullRow) {
       if (nbFullRow === 4) {
-        this.gameService.playSound("clear");
+        this.gameService.playSound('clear');
       }
       else {
-        this.gameService.playSound("line");
+        this.gameService.playSound('line');
       }
       this.gameService.incrementScoreByFullLine(nbFullRow);
       this.gameService.adjustLoopDelay();

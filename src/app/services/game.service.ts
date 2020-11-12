@@ -44,7 +44,7 @@ export class GameService {
   // game speed control
   public intervalle = this.startInterval;
   public  stepperInverval$: Observable<number>;
-  private stepperInvervalSubject = new BehaviorSubject<number>(this.intervalle)
+  private stepperInvervalSubject = new BehaviorSubject<number>(this.intervalle);
 
   constructor(
   ) {
@@ -117,7 +117,7 @@ export class GameService {
     player.play();
   }
 
-  public reset() {
+  public reset(): void {
     this.multiValue.set('elapsed', 0);
     this.multiValue.set('lines', 0);
     this.multiValue.set('score', 0);

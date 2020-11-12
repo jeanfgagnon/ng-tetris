@@ -16,7 +16,7 @@ import { GameService } from 'src/app/services/game.service';
 export class HighScoresComponent implements OnInit, OnDestroy {
 
   private unsubscribe$ = new Subject<void>();
-  private readonly _storageKey = 'b3dingb3dang';
+  private readonly storageKey = 'b3dingb3dang';
 
   public highScoreList: HighScoreModel[] = [];
   public userName = '';
@@ -44,7 +44,7 @@ export class HighScoresComponent implements OnInit, OnDestroy {
     if (msg.isEndGame) {
       if (this.isHighScore()) {
         this.openModal();
-        this.gameService.playSound("success");
+        this.gameService.playSound('success');
       }
     }
   }
@@ -82,11 +82,11 @@ export class HighScoresComponent implements OnInit, OnDestroy {
 
   private loadHighScoreFromLocalStorage(): HighScoreModel[] {
     let rv: HighScoreModel[] = [];
-    const json = window.localStorage.getItem(this._storageKey);
+    const json = window.localStorage.getItem(this.storageKey);
     if (json) {
       rv = (JSON.parse(json) as HighScoreModel[]).sort((a: HighScoreModel, b: HighScoreModel) => {
-        if (a.score < b.score) return 1;
-        if (a.score > b.score) return -1;
+        if (a.score < b.score) { return 1; }
+        if (a.score > b.score) { return -1; }
         return 0;
       });
     }
@@ -95,7 +95,7 @@ export class HighScoresComponent implements OnInit, OnDestroy {
 
   private saveHighScoreInLocalStorage(): void {
     const json = JSON.stringify(this.highScoreList);
-    window.localStorage.setItem(this._storageKey, json);
+    window.localStorage.setItem(this.storageKey, json);
   }
 
   private addScore(): void {
@@ -110,8 +110,8 @@ export class HighScoresComponent implements OnInit, OnDestroy {
     this.highScoreList.push(hs);
 
     this.highScoreList = this.highScoreList.sort((a: HighScoreModel, b: HighScoreModel) => {
-      if (a.score < b.score) return 1;
-      if (a.score > b.score) return -1;
+      if (a.score < b.score) { return 1; }
+      if (a.score > b.score) { return -1; }
       return 0;
     });
 
