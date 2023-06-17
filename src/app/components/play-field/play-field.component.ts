@@ -299,8 +299,8 @@ export class PlayFieldComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private dropTile(row: number, col: number): void {
     if (row > 0) {
-      this.tableau[row][col].bgColor = this.tableau[row - 1][col].bgColor;
       this.tableau[row][col].free = this.tableau[row - 1][col].free;
+      this.tableau[row][col].bgColor = this.tableau[row - 1][col].bgColor;
       this.tableau[row - 1][col].free = true;
       this.tableau[row - 1][col].bgColor = this.gameService.fieldBgColor;
     }
